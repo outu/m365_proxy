@@ -44,7 +44,10 @@ public class M365_proxy_application {
             return false;
         }
 
+        int argCount = 0;
+
         for(String arg : args) {
+            argCount++;
             String tmpArg = arg.substring(0, 2);
             switch (tmpArg) {
                 case "-h":
@@ -66,7 +69,9 @@ public class M365_proxy_application {
                     }
                     break;
                 default:
-                    return false;
+                    if (argCount <= 2){
+                        return false;
+                    }
             }
         }
 
