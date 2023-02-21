@@ -13,9 +13,13 @@
 
 package m365_proxy;
 
+import java.io.IOException;
+
 public class M365_proxy_application {
 
-    String appName = "M365_proxy";
+    String _app_name = "M365_proxy";
+
+    int _thread_pool_num = 30;
 
     public boolean _exit_flag = false;
 
@@ -23,12 +27,13 @@ public class M365_proxy_application {
 
     public String _process_uuid;
 
-    public Boolean main(String[] args){
+    public Boolean main(String[] args) throws IOException {
         boolean ret = true;
 
         M365_proxy_listen_connection m365_proxy_listen_connection = new M365_proxy_listen_connection();
-        m365_proxy_listen_connection.init(_listen_port, _process_uuid);
+        m365_proxy_listen_connection.init(_listen_port, _process_uuid, _thread_pool_num);
         ret = m365_proxy_listen_connection.run();
+        m365_proxy_listen_connection.destroy();
 
         return ret;
     }
@@ -38,7 +43,7 @@ public class M365_proxy_application {
      * @param args arg value
      * @return true-success, false-error
      */
-    public boolean ParseArgs(String[] args){
+    public boolean parseArgs(String[] args){
 
         if (0 == args.length){
             return false;
@@ -51,11 +56,11 @@ public class M365_proxy_application {
             String tmpArg = arg.substring(0, 2);
             switch (tmpArg) {
                 case "-h":
-                    ShowHelp();
+                    showHelp();
                     _exit_flag = true;
                     return true;
                 case "-v":
-                    ShowVersion();
+                    showVersion();
                     _exit_flag = true;
                     return true;
                 case "-p":
@@ -91,7 +96,7 @@ public class M365_proxy_application {
      * @Description : global init
      * @return true
      */
-    public boolean GlobalInit() {
+    public boolean globalInit() {
 
         //init global exit flag
         M365_proxy_global_vals.g_service_exit_flag = false;
@@ -103,7 +108,7 @@ public class M365_proxy_application {
      * @Description global clean up
      * @return true
      */
-    public boolean GlobalCleanup() {
+    public boolean globalCleanup() {
 
         return true;
     }
@@ -111,11 +116,11 @@ public class M365_proxy_application {
     /**
      * @Description : show help
      */
-    public void ShowHelp(){
+    public void showHelp(){
         String helpString = "";
 
-        helpString += appName + ": Vinchin backup and recovery system\n";
-        helpString += "\nUsage: " + appName + "[options]\n";
+        helpString += _app_name + ": Vinchin backup and recovery system\n";
+        helpString += "\nUsage: " + _app_name + "[options]\n";
         helpString += "Options:\n"
             +"  -h, --help			            Display this help message and exit.\n"
             +"  -v, --version			        Display version information and exit.\n"
@@ -128,10 +133,10 @@ public class M365_proxy_application {
     /**
      * @Description : show version
      */
-    public void ShowVersion(){
+    public void showVersion(){
         String version = "";
 
-        version += appName + " v2.0\n";
+        version += _app_name + " v2.0\n";
         version += "Copyright (c) 2014-2023 Vinchin, Inc.";
 
         System.out.println(version);

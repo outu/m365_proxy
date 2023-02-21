@@ -20,7 +20,7 @@ public class M365_proxy {
         M365_proxy_application app = new M365_proxy_application();
 
         // parser the arguments for m365_proxy, the port and uuid is necessary
-        if (!app.ParseArgs(args)){
+        if (!app.parseArgs(args)){
             System.out.println("parser arguments error");
             ret =  false;
         }
@@ -31,7 +31,7 @@ public class M365_proxy {
 
         // global initialize
         if (ret && !M365_proxy_global_vals.g_service_exit_flag){
-            ret = app.GlobalInit();
+            ret = app.globalInit();
             if (!ret){
                 System.out.println("global initialize error.");
             }
@@ -44,7 +44,7 @@ public class M365_proxy {
             }
         }
 
-        app.GlobalCleanup();
+        app.globalCleanup();
 
         if (!ret){
             System.out.println("m365_proxy exit failed !!!");

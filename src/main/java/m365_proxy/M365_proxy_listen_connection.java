@@ -27,50 +27,57 @@ public class M365_proxy_listen_connection {
 
     public static String _process_uuid;
 
+    public static boolean _stop = false;
+
+    private int _thread_pool_num;
+
     private ExecutorService service;
 
     private AsynchronousServerSocketChannel serverChannel;
 
-    public void init(int port, String uuid){
+    /**
+     * @Description init socket port
+     * @param port socket port
+     * @param uuid process uuid
+     * @param threadPoolNum Socket listens to the number of threads in the asynchronous execution thread pool
+     */
+    public void init(int port, String uuid, int threadPoolNum){
         _listen_port = port;
         _process_uuid = uuid;
-
+        _thread_pool_num = threadPoolNum;
     }
 
-    public Boolean run(){
+    /**
+     * @Description Enable socket listening
+     * @return true-success false-failed
+     */
+    public Boolean run() throws RuntimeException{
         System.out.println("server starting at port " +_listen_port + "..");
-        // 初始化定长线程池
-        service = Executors.newFixedThreadPool(4);
+        // Initialize fixed length thread pool
+        service = Executors.newFixedThreadPool(_thread_pool_num);
         try {
-            // 初始化 AsyncronousServersocketChannel
+            // Init AsynchronousServerSocketChannel
             serverChannel = AsynchronousServerSocketChannel.open();
-//            // 监听端口
-
             serverChannel.bind(new InetSocketAddress(_listen_port));
-
-            // 监听客户端连接,但在AIO，每次accept只能接收一个client，所以需要
-            // 在处理逻辑种再次调用accept用于开启下一次的监听
-
-            // 类似于链式调用
+            // Listen to client connections, but in AIO, each accept can only receive one client,
+            // so you need to call accept again in the processing logic to start the next listen, similar to chain call
             serverChannel.accept(this, new M365_proxy_work_thread());
-
-            try {
-                // 阻塞程序，防止被GC回收
-                while(true){
-
-                    if(M365_proxy_global_vals.g_service_exit_flag){
-                        serverChannel.close();
-                        break;
-                    }
-
+            while(true){
+                if (_stop){
                     TimeUnit.SECONDS.sleep(5L);
+                    M365_proxy_global_vals.g_service_exit_flag = true;
+                    serverChannel.close();
+                    break;
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                TimeUnit.SECONDS.sleep(5L);
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
+        } catch (InterruptedException e) {
+            return false;
         }
+
         return true;
     }
 
@@ -82,6 +89,10 @@ public class M365_proxy_listen_connection {
         return serverChannel;
     }
 
+    /**
+     * close server channel
+     * @throws IOException
+     */
     public void destroy() throws IOException {
         serverChannel.close();
     }

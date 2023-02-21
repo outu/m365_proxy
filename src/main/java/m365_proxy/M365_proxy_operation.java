@@ -14,4 +14,7 @@
 package m365_proxy;
 
 public class M365_proxy_operation {
+    public String getUserInfo(){
+        return "";
+    }
 }
