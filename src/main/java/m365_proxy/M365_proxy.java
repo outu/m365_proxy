@@ -13,9 +13,10 @@
 
 package m365_proxy;
 
+import common.TypeConversion;
+
 public class M365_proxy {
     public static void main(String[] args) throws Exception {
-
         boolean ret = true;
         M365_proxy_application app = new M365_proxy_application();
 

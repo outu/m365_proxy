@@ -23,17 +23,20 @@ import java.util.concurrent.TimeUnit;
 
 public class M365_proxy_listen_connection {
 
+    /**
+     * public values is shared by thread in attachment
+     */
     public int _listen_port;
 
-    public static String _process_uuid;
+    public String _process_uuid;
 
-    public static boolean _stop = false;
+    public boolean _stop = false;
 
     private int _thread_pool_num;
 
-    private ExecutorService service;
+    private ExecutorService _service;
 
-    private AsynchronousServerSocketChannel serverChannel;
+    private AsynchronousServerSocketChannel _serverChannel;
 
     /**
      * @Description init socket port
@@ -54,19 +57,19 @@ public class M365_proxy_listen_connection {
     public Boolean run() throws RuntimeException{
         System.out.println("server starting at port " +_listen_port + "..");
         // Initialize fixed length thread pool
-        service = Executors.newFixedThreadPool(_thread_pool_num);
+        _service = Executors.newFixedThreadPool(_thread_pool_num);
         try {
             // Init AsynchronousServerSocketChannel
-            serverChannel = AsynchronousServerSocketChannel.open();
-            serverChannel.bind(new InetSocketAddress(_listen_port));
+            _serverChannel = AsynchronousServerSocketChannel.open();
+            _serverChannel.bind(new InetSocketAddress(_listen_port));
             // Listen to client connections, but in AIO, each accept can only receive one client,
             // so you need to call accept again in the processing logic to start the next listen, similar to chain call
-            serverChannel.accept(this, new M365_proxy_work_thread());
+            _serverChannel.accept(this, new M365_proxy_work_thread());
             while(true){
                 if (_stop){
                     TimeUnit.SECONDS.sleep(5L);
                     M365_proxy_global_vals.g_service_exit_flag = true;
-                    serverChannel.close();
+                    _serverChannel.close();
                     break;
                 }
                 TimeUnit.SECONDS.sleep(5L);
@@ -82,11 +85,11 @@ public class M365_proxy_listen_connection {
     }
 
     public ExecutorService getService() {
-        return service;
+        return _service;
     }
 
     public AsynchronousServerSocketChannel getServerChannel() {
-        return serverChannel;
+        return _serverChannel;
     }
 
     /**
@@ -94,6 +97,8 @@ public class M365_proxy_listen_connection {
      * @throws IOException
      */
     public void destroy() throws IOException {
-        serverChannel.close();
+        if (_serverChannel != null){
+            _serverChannel.close();
+        }
     }
 }

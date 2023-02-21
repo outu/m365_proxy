@@ -13,16 +13,26 @@
 
 package common;
 
+import java.nio.ByteBuffer;
+
 public class TypeConversion {
+
+    /**
+     * C++'s small-end byte is converted to Java's large-end int type
+     * @param byteVal
+     * @return
+     */
     public static int bytesToInt(byte[] byteVal) {
-        if (byteVal == null || byteVal.length != 4) return 0;
+        byte[] tmp = new byte[4];
+        System.arraycopy(byteVal, 0, tmp, 0, byteVal.length);
+        if (byteVal == null) return 0;
         /*
         	&0xff 的原因是将它原内容转为int再做位移和或运算
         	强转int由于java没有unsigned，所以byte是带符号位的
         	当单byte>128的时候强转int会出现负数(符号扩展)
         	最好的办法就是&0xff
         */
-        return byteVal[0] & 0xff | ((byteVal[1] & 0xff) << 8) | ((byteVal[2] & 0xff) << 16) | ((byteVal[3] & 0xff) << 24);
+        return tmp[0] & 0xff | ((tmp[1] & 0xff) << 8) | ((tmp[2] & 0xff) << 16) | ((tmp[3] & 0xff) << 24);
     }
 
     public static byte[] intToBytes(int n){
@@ -34,6 +44,11 @@ public class TypeConversion {
         return b;
     }
 
+    /**
+     * @Description C++'s small-end byte is converted to Java's large-end long type
+     * @param byteVal
+     * @return
+     */
     public static long bytesToLong(byte[] byteVal)  {
         int bytes = byteVal.length;
 
@@ -43,20 +58,19 @@ public class TypeConversion {
             case 1:
                 return (long)((byteVal[0] & 0xff));
             case 2:
-                return (long)((byteVal[0] & 0xff) <<8 | (byteVal[1] & 0xff));
+                return (long)((byteVal[0] & 0xff) | (byteVal[1] & 0xff)) << 8;
             case 3:
-                return (long)((byteVal[0] & 0xff) <<16 | (byteVal[1] & 0xff) <<8 | (byteVal[2] & 0xff));
+                return (long)((byteVal[0] & 0xff) | (byteVal[1] & 0xff) << 8 | (byteVal[2] & 0xff)) << 16 ;
             case 4:
-                return (long)((byteVal[0] & 0xffL) <<24 | (byteVal[1] & 0xffL) << 16 | (byteVal[2] & 0xffL) <<8 | (byteVal[3] & 0xffL));
+                return (long)((byteVal[0] & 0xffL) | (byteVal[1] & 0xffL) << 8 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) << 24);
             case 5:
-                return (long)((byteVal[0] & 0xffL) <<32 | (byteVal[1] & 0xffL) <<24 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) <<8 | (byteVal[4] & 0xffL));
+                return (long)((byteVal[0] & 0xffL) | (byteVal[1] & 0xffL) << 8 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) << 24 | (byteVal[4] & 0xffL) << 32);
             case 6:
-                return (long)((byteVal[0] & 0xffL) <<40 | (byteVal[1] & 0xffL) <<32 | (byteVal[2] & 0xffL) <<24 | (byteVal[3] & 0xffL) << 16 | (byteVal[4] & 0xffL) <<8 | (byteVal[5] & 0xffL));
+                return (long)((byteVal[0] & 0xffL) | (byteVal[1] & 0xffL) << 8 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) << 24 | (byteVal[4] & 0xffL) << 32 | (byteVal[5] & 0xffL) << 40);
             case 7:
-                return (long)((byteVal[0] & 0xffL) <<48 | (byteVal[1] & 0xffL) <<40 | (byteVal[2] & 0xffL) <<32 | (byteVal[3] & 0xffL) <<24 | (byteVal[4] & 0xffL) << 16 | (byteVal[5] & 0xffL) <<8 | (byteVal[6] & 0xffL));
+                return (long)((byteVal[0] & 0xffL) | (byteVal[1] & 0xffL) << 8 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) << 24 | (byteVal[4] & 0xffL) << 32 | (byteVal[5] & 0xffL) << 40 | (byteVal[6] & 0xffL) << 48);
             case 8:
-                return (long)((byteVal[0] & 0xffL) <<56 | (byteVal[1] & 0xffL) << 48 | (byteVal[2] & 0xffL) <<40 | (byteVal[3] & 0xffL)<<32 |
-                        (byteVal[4] & 0xffL) <<24 | (byteVal[5] & 0xffL) << 16 | (byteVal[6] & 0xffL) <<8 | (byteVal[7] & 0xffL));
+                return (long)((byteVal[0] & 0xffL) | (byteVal[1] & 0xffL) << 8 | (byteVal[2] & 0xffL) << 16 | (byteVal[3] & 0xffL) << 24 | (byteVal[4] & 0xffL) << 32 | (byteVal[5] & 0xffL) << 40 | (byteVal[6] & 0xffL) << 48 | (byteVal[7] & 0xffL) << 56);
             default:
                 return 0;
         }
