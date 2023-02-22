@@ -41,9 +41,12 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
 
     @Override
     public void failed(Throwable exc, M365_proxy_listen_connection attachment) {
-        exc.printStackTrace();
+        //exc.printStackTrace();
         if (_rpcServer != null){
             _rpcServer = null;
+        }
+        if (_clientChannel != null && _clientChannel.isOpen() && attachment != null){
+            attachment.getServerChannel().accept(attachment, this);
         }
     }
 

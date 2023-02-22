@@ -13,6 +13,9 @@
 
 package m365_proxy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class M365_proxy_application {
@@ -97,7 +100,8 @@ public class M365_proxy_application {
      * @return true
      */
     public boolean globalInit() {
-
+        //init logpack
+        M365_proxy_config.initLogback();
         //init global exit flag
         M365_proxy_global_vals.g_service_exit_flag = false;
 
