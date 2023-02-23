@@ -49,7 +49,7 @@ public class M365_proxy_rpc_server {
         _destroy = true;
     }
 
-    public void waitAndHandleRequest(){
+    public void waitAndHandleRequest() throws InterruptedException {
         boolean ret = false;
         BdCommonRpcMessageHeader rpcHeader = new BdCommonRpcMessageHeader();
 
@@ -103,13 +103,13 @@ public class M365_proxy_rpc_server {
         System.out.println("socket finished!!!");
     }
 
-    public boolean HandleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length){
+    public boolean HandleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException {
         switch (M365RpcOpcode.getOpCodeEnum(privateRpcOpcode)){
             case M365_RPC_OPCODE_PROXY_GET_USER:
                 System.out.println(new String(byteBuffer.array()));
                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 String userJson =  handleGetUser();
-                _clientAttachment._stop = true;
+                TimeUnit.SECONDS.sleep(500L);
                 break;
             default:
                 System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");

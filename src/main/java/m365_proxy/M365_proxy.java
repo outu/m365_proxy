@@ -41,6 +41,7 @@ public class M365_proxy {
         }
 
         if(ret && !M365_proxy_global_vals.g_service_exit_flag){
+            logger.debug("m365_proxy start ...");
             ret = app.main(args);
             if (!ret){
                 logger.error("m365_proxy started to listen and handle network events error.");
