@@ -87,8 +87,6 @@ public class M365_proxy_listen_connection {
             while(true){
                 if (_stop){
                     M365_proxy_global_vals.g_service_exit_flag = true;
-                    _serverChannel.close();
-                    logger.debug("set global exit flag, close socket channel.");
                     break;
                 }
                 TimeUnit.SECONDS.sleep(1L);
@@ -113,19 +111,17 @@ public class M365_proxy_listen_connection {
     }
 
     /**
-     * close server channel
-     * @throws IOException
+     * @Description close all thread and clear all thread cache
      */
     public void destroy() throws IOException {
-
         if (_serverChannel != null){
             _serverChannel.close();
         }
 
-        if (_workThreadManager != null){
+        if (!_workThreadManager.isEmpty()){
             for (String key : _workThreadManager.keySet()){
                 Thread workThread = _workThreadManager.get(key);
-                if (workThread.isAlive()){
+                if (workThread.isAlive() && !workThread.isInterrupted()){
                     workThread.interrupt();
                 }
             }

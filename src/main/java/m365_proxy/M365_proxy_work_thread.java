@@ -13,73 +13,97 @@
 
 package m365_proxy;
 
-import common.TypeConversion;
 import common.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 
 public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSocketChannel, M365_proxy_listen_connection> {
     public static final Logger logger = LoggerFactory.getLogger(M365_proxy_work_thread.class);
     private AsynchronousSocketChannel _clientChannel;
-    private M365_proxy_rpc_server _rpcServer;
 
     private String _threadUuid;
 
+    /**
+     * @Description Invoked when an operation has completed.
+     * @param socketChannel
+     *          The result of the I/O operation.
+     * @param attachment
+     *          The object attached to the I/O operation when it was initiated.
+     */
     @Override
     public void completed(AsynchronousSocketChannel socketChannel, M365_proxy_listen_connection attachment) {
         try {
-            logger.debug("accept one connection: " + socketChannel.getRemoteAddress());
             //start the next listen
             attachment.getServerChannel().accept(attachment, new M365_proxy_work_thread());
+
+            logger.debug("accept one connection: " + socketChannel.getRemoteAddress());
+
             addMapThreadUuidToThreadObj(attachment);
             logger.debug("add thread: " + _threadUuid + "to map thread obj");
 
             _clientChannel = socketChannel;
-            _rpcServer = new M365_proxy_rpc_server();
-            _rpcServer.init(socketChannel, attachment);
-            _rpcServer.waitAndHandleRequest();
+            M365_proxy_rpc_server rpcServer = new M365_proxy_rpc_server();
+            rpcServer.init(socketChannel, attachment);
+            rpcServer.waitAndHandleRequest();
 
             destroy(attachment);
-            logger.debug("connection closed, thread");
+            logger.debug("connection closed, thread: " + _threadUuid + "exit");
         } catch (IOException e) {
+            destroy(attachment);
             logger.error("handle connection message failed: " + e.getMessage());
+            logger.debug("connection closed, thread: " + _threadUuid + "exit");
         } catch (InterruptedException e) {
+            destroy(attachment);
             logger.warn("handle connection message interrupted: " + e.getMessage());;
+            logger.debug("connection closed, thread: " + _threadUuid + "exit");
         }
     }
 
+    /**
+     * @Description Invoked when an operation fails.
+     * @param exc
+     *          The exception to indicate why the I/O operation failed
+     * @param attachment
+     *          The object attached to the I/O operation when it was initiated.
+     */
     @Override
     public void failed(Throwable exc, M365_proxy_listen_connection attachment) {
-        logger.error("connection failed: " + exc.getMessage());
-        //exc.printStackTrace();
-        if (_rpcServer != null){
-            _rpcServer = null;
-        }
-        if (_clientChannel != null && _clientChannel.isOpen() && attachment != null){
-            attachment.getServerChannel().accept(attachment, this);
-        }
+        logger.warn("the I/O operation failed and build connection failed: " + exc.getMessage());
+        attachment.getServerChannel().accept(attachment, new M365_proxy_work_thread());
+
+        destroy(attachment);
     }
 
+    /**
+     * @Description Store the thread object in the shared map according to the thread uuid
+     * @param attachment M365_proxy_listen_connection shared class
+     */
     private synchronized void addMapThreadUuidToThreadObj(M365_proxy_listen_connection attachment){
         _threadUuid = getThreadUuid();
         attachment._workThreadManager.put(_threadUuid, Thread.currentThread());
     }
 
-    private synchronized void destroy(M365_proxy_listen_connection attachment) throws IOException {
-        attachment._workThreadManager.remove(_threadUuid);
-        _clientChannel.close();
-        _rpcServer = null;
-        _clientChannel = null;
+    /**
+     * @Description Delete all caches of thread, like share map and socket channel
+     * @param attachment M365_proxy_listen_connection shared class
+     */
+    private synchronized void destroy(M365_proxy_listen_connection attachment){
+        try {
+            boolean containKey = attachment._workThreadManager.containsKey(_threadUuid);
+            if (containKey){
+                attachment._workThreadManager.remove(_threadUuid);
+            }
 
+            _clientChannel.close();
+            _clientChannel = null;
+        } catch (IOException e){
+            logger.warn("thread " + _threadUuid + "self destroy error: " + e.getMessage());
+        }
     }
 
     private String getThreadUuid(){

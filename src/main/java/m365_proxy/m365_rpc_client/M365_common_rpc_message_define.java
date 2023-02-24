@@ -19,9 +19,7 @@
  *
  ***********************************************************************/
 
-package m365_proxy;
-
-import apis.BaseUtil;
+package m365_proxy.m365_rpc_client;
 
 /**
  *
@@ -31,14 +29,6 @@ public class M365_rpc_message_define {
     public static long M365_DEFAULT_RPC_TIMEOUT = 600;
     public static long M365_DEFAULT_RPC_RETYR_TIMEOUT = 1800;
 
-}
-
-class BdCommonRpcMessageHeader{
-    public static int bd_common_rpc_message_header_size = 16;
-    public int op_type;
-    public int need_response;
-    public long opcode;
-    public long body_len;
 }
 
 enum BdRpcOpType{
@@ -71,7 +61,16 @@ enum BdRpcOpType{
  * Rpc execution opcode set, including m365_client_manager,m365_client_transfer,m365_proxy
  */
 enum M365RpcOpcode{
-    M365_RPC_OPCODE_PROXY_GET_USER(0);
+    M365_RPC_OPCODE_DETECT_ENV(100),
+    M365_RPC_OPCODE_GET_USER_LIST(102),
+    M365_RPC_OPCODE_GET_GROUP_LIST(103),
+    /**
+     * EXCHANGE ONLINE&EXCHANGE SERVER RPC OPCODE
+     */
+    M365_RPC_OPCODE_CONNECT_USER(200),
+    M365_RPC_OPCODE_CONNECT_GROUP(201),
+    M365_RPC_OPCODE_GET_USER_FOLDER_INFO(202);
+
 
     private int opCode = 0;
 
@@ -92,6 +91,14 @@ enum M365RpcOpcode{
 
         return null;
     }
+}
+
+class BdCommonRpcMessageHeader{
+    public static int bd_common_rpc_message_header_size = 16;
+    public int op_type;
+    public int need_response;
+    public long opcode;
+    public long body_len;
 }
 
 class M365ProxyGetUserMessage{

@@ -36,7 +36,6 @@ public class M365_proxy_application {
         M365_proxy_listen_connection m365_proxy_listen_connection = new M365_proxy_listen_connection();
         m365_proxy_listen_connection.init(_listen_port, _process_uuid, _thread_pool_num);
         ret = m365_proxy_listen_connection.run();
-        m365_proxy_listen_connection.destroy();
 
         return ret;
     }

@@ -14,11 +14,13 @@
 package m365_proxy;
 
 import common.TypeConversion;
+import m365_proxy.m365_rpc_client.BdCommonRpcMessageHeader;
+import m365_proxy.m365_rpc_client.BdRpcOpType;
+import m365_proxy.m365_rpc_client.M365RpcOpcode;
+import m365_proxy.m365_rpc_client.M365_rpc_message_define;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -105,7 +107,7 @@ public class M365_proxy_rpc_server {
 
     public boolean HandleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException {
         switch (M365RpcOpcode.getOpCodeEnum(privateRpcOpcode)){
-            case M365_RPC_OPCODE_PROXY_GET_USER:
+            case M365_RPC_OPCODE_CONNECT_GROUP:
                 System.out.println(new String(byteBuffer.array()));
                 System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 String userJson =  handleGetUser();
