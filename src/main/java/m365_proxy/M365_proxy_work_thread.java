@@ -53,14 +53,10 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
 
             destroy(attachment);
             logger.debug("connection closed, thread: " + _threadUuid + "exit");
-        } catch (IOException e) {
+        } catch (Exception e) {
             destroy(attachment);
             logger.error("handle connection message failed: " + e.getMessage());
-            logger.debug("connection closed, thread: " + _threadUuid + "exit");
-        } catch (InterruptedException e) {
-            destroy(attachment);
-            logger.warn("handle connection message interrupted: " + e.getMessage());;
-            logger.debug("connection closed, thread: " + _threadUuid + "exit");
+            logger.debug("connection closed, thread: " + _threadUuid + " exit");
         }
     }
 

@@ -94,9 +94,8 @@ public class M365_proxy_listen_connection {
             destroy();
         } catch (IOException | InterruptedException e) {
             logger.error("start socket listening error: " + e.getMessage());
-            ret = false;
-        } finally {
             destroy();
+            ret = false;
         }
 
         return ret;
@@ -113,21 +112,33 @@ public class M365_proxy_listen_connection {
     /**
      * @Description close all thread and clear all thread cache
      */
-    public void destroy() throws IOException {
-        if (_serverChannel != null){
-            _serverChannel.close();
-        }
-
-        if (!_workThreadManager.isEmpty()){
-            for (String key : _workThreadManager.keySet()){
-                Thread workThread = _workThreadManager.get(key);
-                if (workThread.isAlive() && !workThread.isInterrupted()){
-                    workThread.interrupt();
+    public void destroy(){
+        try {
+            if (!_workThreadManager.isEmpty()){
+                for (String key : _workThreadManager.keySet()){
+                    Thread workThread = _workThreadManager.get(key);
+                    if (workThread.isAlive() && !workThread.isInterrupted()){
+                        workThread.interrupt();
+                    }
                 }
+                _workThreadManager.clear();
             }
+
+            if (!_channelGroup.isShutdown()){
+                _channelGroup.shutdown();
+                _channelGroup= null;
+            }
+
+            if (!_executorService.isShutdown()){
+                _executorService.shutdown();
+                _executorService = null;
+            }
+
+            if (_serverChannel != null){
+                _serverChannel.close();
+            }
+        } catch (Exception e){
+            logger.warn("destroy error: " + e.getMessage());
         }
-        _channelGroup.shutdown();
-        _executorService.shutdown();
-        _workThreadManager.clear();
     }
 }

@@ -25,86 +25,75 @@ package m365_proxy.m365_rpc_client;
  *
  */
 
-public class M365_rpc_message_define {
-    public static long M365_DEFAULT_RPC_TIMEOUT = 600;
-    public static long M365_DEFAULT_RPC_RETYR_TIMEOUT = 1800;
+public class M365_common_rpc_message_define {
+    public final static long M365_DEFAULT_RPC_TIMEOUT = 600;
+    public final static long M365_DEFAULT_RPC_RETRY_TIMEOUT = 1800;
 
-}
-
-enum BdRpcOpType{
-    BD_RPC_OP_TYPE_UNKNOWN(0),      // rpc operation type unknown
-    BD_RPC_OP_TYPE_PUBLIC(1),       // public rpc operation type
-    BD_RPC_OP_TYPE_PRIVATE(2);    // public rpc operation type
-
-    private int opType = 0;
-
-    private BdRpcOpType(int value) {
-        opType = value;
-    }
-
-    private int getCode(){
-        return opType;
-    }
-
-    public static BdRpcOpType getOpTypeEnum(int opType){
-        for (BdRpcOpType bdRpcOpType : BdRpcOpType.values()){
-            if (bdRpcOpType.getCode() == opType){
-                return bdRpcOpType;
-            }
-        }
-
-        return null;
-    }
-}
-
-/**
- * Rpc execution opcode set, including m365_client_manager,m365_client_transfer,m365_proxy
- */
-enum M365RpcOpcode{
-    M365_RPC_OPCODE_DETECT_ENV(100),
-    M365_RPC_OPCODE_GET_USER_LIST(102),
-    M365_RPC_OPCODE_GET_GROUP_LIST(103),
     /**
-     * EXCHANGE ONLINE&EXCHANGE SERVER RPC OPCODE
+     * Microsoft365 submodule Rpc optype: Common/Exchange/sharepoint...
      */
-    M365_RPC_OPCODE_CONNECT_USER(200),
-    M365_RPC_OPCODE_CONNECT_GROUP(201),
-    M365_RPC_OPCODE_GET_USER_FOLDER_INFO(202);
+    public enum M365RpcOpType {
+        M365_RPC_OP_TYPE_COMMON(1),       // common rpc operation type
+        M365_RPC_OP_TYPE_EXCH(2);         // Exchange Online&Exchange Server rpc operation type
 
+        private int opType = 0;
 
-    private int opCode = 0;
-
-    private M365RpcOpcode(int value) {
-        opCode = value;
-    }
-
-    private int getOpCode() {
-        return opCode;
-    }
-
-    public static M365RpcOpcode getOpCodeEnum(int opCode){
-        for (M365RpcOpcode m365RpcOpcode : M365RpcOpcode.values()){
-            if (m365RpcOpcode.getOpCode() == opCode){
-                return  m365RpcOpcode;
-            }
+        private M365RpcOpType(int value) {
+            opType = value;
         }
 
-        return null;
+        private int getCode() {
+            return opType;
+        }
+
+        public static M365_common_rpc_message_define.M365RpcOpType getOpTypeEnum(int opType) {
+            for (M365_common_rpc_message_define.M365RpcOpType m365RpcOpType : M365_common_rpc_message_define.M365RpcOpType.values()) {
+                if (m365RpcOpType.getCode() == opType) {
+                    return m365RpcOpType;
+                }
+            }
+
+            return null;
+        }
     }
-}
 
-class BdCommonRpcMessageHeader{
-    public static int bd_common_rpc_message_header_size = 16;
-    public int op_type;
-    public int need_response;
-    public long opcode;
-    public long body_len;
-}
+    /**
+     * Set common rpc operation of M365, including m365_client_manager,m365_client_transfer
+     */
+    public static enum M365CommonRpcOpcode{
+        M365_COMMON_RPC_OPCODE_DETECT_ENV(100),
+        M365_COMMON_RPC_OPCODE_GET_USER_LIST(101),
+        M365_COMMON_RPC_OPCODE_GET_GROUP_LIST(102),
+        M365_COMMON_RPC_OPCODE_CONNECT_USER(103),
+        M365_COMMON_RPC_OPCODE_CONNECT_GROUP(104),
+        M365_COMMON_RPC_IS_USER_EXISTS(105);
 
-class M365ProxyGetUserMessage{
-    int region;
-    public M365ProxyGetUserMessage(){
-        region = 0;
+        private int opCode = 0;
+
+        private M365CommonRpcOpcode(int value) {
+            opCode = value;
+        }
+
+        private int getOpCode() {
+            return opCode;
+        }
+
+        public static M365CommonRpcOpcode getOpCodeEnum(int opCode){
+            for (M365CommonRpcOpcode m365CommonRpcOpcode : M365CommonRpcOpcode.values()){
+                if (m365CommonRpcOpcode.getOpCode() == opCode){
+                    return  m365CommonRpcOpcode;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public static class M365CommonGetUserMessage{
+        int region;
+        public M365CommonGetUserMessage(){
+            region = 0;
+        }
     }
 }
 
