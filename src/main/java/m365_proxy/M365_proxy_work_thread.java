@@ -52,7 +52,7 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
             rpcServer.waitAndHandleRequest();
 
             destroy(attachment);
-            logger.debug("connection closed, thread: " + _threadUuid + "exit");
+            logger.debug("connection closed, thread: " + _threadUuid + " exit");
         } catch (Exception e) {
             destroy(attachment);
             logger.error("handle connection message failed: " + e.getMessage());

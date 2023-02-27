@@ -16,6 +16,7 @@ package m365_proxy.m365_rpc_client;
 public class Exch_rpc_message_define {
 
     public enum ExchRpcOpType {
+        EXCH_RPC_OP_TYPE_COMMON(0),
         EXCH_RPC_OP_TYPE_MAIL(1),                // mail rpc operation type
         EXCH_RPC_OP_TYPE_APPOINTMENT(2),         // appointment rpc operation type
         EXCH_RPC_OP_TYPE_CONTACT(3),             // contact rpc operation type
@@ -44,26 +45,26 @@ public class Exch_rpc_message_define {
 
     /**
      * Set common rpc operation of M365, including m365_client_manager,m365_client_transfer
+     * number : 200~400
      */
     public enum ExchRpcOpcode{
+        /******************************************* exch common type: 201~250 *****************************************/
         EXCH_RPC_OPCODE_GET_ROOT_FOLDER(200),
-        /******************************************* mail type: 201~250 *****************************************/
-        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_GRAPH(201),
-        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_EWS(202),
-        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_GRAPH(203),
-        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_EWS(204),
-        EXCH_RPC_OPCODE_GET_MAIL_INFO_BY_EWS(205),
-        EXCH_RPC_OPCODE_GET_MAIL_MIMECONTENT_BY_EWS(206),
-        EXCH_RPC_OPCODE_GET_MAIL_XML_DATA_BY_SOAP(207);
+        /******************************************* mail type: 251~300 *****************************************/
+        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_GRAPH(251),
+        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_EWS(252),
+        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_GRAPH(253),
+        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_EWS(254),
+        EXCH_RPC_OPCODE_GET_MAIL_INFO_BY_EWS(255),
+        EXCH_RPC_OPCODE_GET_MAIL_MIMECONTENT_BY_EWS(256),
+        EXCH_RPC_OPCODE_GET_MAIL_XML_DATA_BY_SOAP(257);
+        /******************************************* event type: 301~350 *****************************************/
 
 
-        /******************************************* event type: 251~300 *****************************************/
+        /******************************************* contact type: 351~400 *****************************************/
 
 
-        /******************************************* contact type: 301~350 *****************************************/
-
-
-        /******************************************* task type: 351~400 *****************************************/
+        /******************************************* task type: 401~450 *****************************************/
 
         private int opCode = 0;
 

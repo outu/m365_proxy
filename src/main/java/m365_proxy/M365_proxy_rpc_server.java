@@ -53,6 +53,10 @@ public class M365_proxy_rpc_server {
         _clientAttachment = attachment;
     }
 
+    /**
+     *Loop to receive socket messages and process messages
+     * @throws InterruptedException
+     */
     public void waitAndHandleRequest() throws InterruptedException {
         boolean ret = true;
 
@@ -109,11 +113,20 @@ public class M365_proxy_rpc_server {
         System.out.println("socket finished!!!");
     }
 
+    /**
+     * handle rpc private packet
+     * @param privateRpcOpcode
+     * @param byteBuffer
+     * @param length
+     * @return
+     * @throws InterruptedException
+     */
     public boolean handleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException {
-        int m365RpcOpType = getM365RpcOpType(privateRpcOpcode);
+        M365RpcOpType m365RpcOpType = getM365RpcOpType(privateRpcOpcode);
         boolean ret = true;
 
-        switch (M365RpcOpType.getOpTypeEnum(m365RpcOpType)){
+        logger.debug("handle private packet....");
+        switch (m365RpcOpType){
             case M365_RPC_OP_TYPE_COMMON:
                 ret = handleRpcM365CommonPacket(privateRpcOpcode, byteBuffer, length);
                 break;
@@ -129,12 +142,27 @@ public class M365_proxy_rpc_server {
         return ret;
     }
 
+    /**
+     * handle rpc public packet
+     * @param publicRpcOpcode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcPublicPacket(int publicRpcOpcode, ByteBuffer byteBuffer, long length){
         return true;
     }
 
+    /**
+     * handle rpc m365 common packet
+     * @param m365CommonRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
         boolean ret = true;
+        logger.debug("handle private->m365 common packet....");
 
         switch (M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode)){
             case M365_COMMON_RPC_OPCODE_DETECT_ENV:
@@ -164,9 +192,17 @@ public class M365_proxy_rpc_server {
         return ret;
     }
 
+    /**
+     * handle Exchange online&Exchange Server packet
+     * @param exchRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcExchPacket(int exchRpcCode, ByteBuffer byteBuffer, long length){
         boolean ret = true;
         ExchRpcOpType exchRpcOpType = getExchRpcOpType(exchRpcCode);
+        logger.debug("handle private->m365 exch packet....");
 
         switch (exchRpcOpType){
             case EXCH_RPC_OP_TYPE_MAIL:
@@ -182,6 +218,7 @@ public class M365_proxy_rpc_server {
                 ret = handleRpcExchTaskPacket(exchRpcCode, byteBuffer, length);
                 break;
             default:
+                logger.debug("111111111111111111111111111111111111....");
                 ret = handleRpcExchCommonPacket(exchRpcCode, byteBuffer, length);
                 break;
         }
@@ -189,41 +226,97 @@ public class M365_proxy_rpc_server {
         return ret;
     }
 
+    /**
+     * handle mail rpc packet in Exchange Online&Exchange Server with M365
+     * @param mailRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcExchMailPacket(int mailRpcCode, ByteBuffer byteBuffer, long length){
+        logger.debug("handle private->m365 common-> mail packet....");
         return true;
     }
 
+    /**
+     * handle mail rpc packet in Exchange Online&Exchange Server with M365
+     * @param appointmentRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcExchAppointmentPacket(int appointmentRpcCode, ByteBuffer byteBuffer, long length){
+        logger.debug("handle private->m365 exch-> appointment packet....");
         return true;
     }
 
+    /**
+     * handle mail rpc packet in Exchange Online&Exchange Server with M365
+     * @param contactRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcExchContactPacket(int contactRpcCode, ByteBuffer byteBuffer, long length){
+        logger.debug("handle private->m365 exch-> contact packet....");
         return true;
     }
 
+    /**
+     * handle mail rpc packet in Exchange Online&Exchange Server with M365
+     * @param taskRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
     public boolean handleRpcExchTaskPacket(int taskRpcCode, ByteBuffer byteBuffer, long length){
+        logger.debug("handle private->m365 exch-> task packet....");
         return true;
     }
 
-    public boolean handleRpcExchCommonPacket(int mailRpcCode, ByteBuffer byteBuffer, long length){
+    /**
+     * handle mail rpc packet in Exchange Online&Exchange Server with M365
+     * @param exchCommonRpcCode
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
+    public boolean handleRpcExchCommonPacket(int exchCommonRpcCode, ByteBuffer byteBuffer, long length){
+        logger.debug("handle private->m365 exch-> common packet....");
         return true;
     }
 
-    private int getM365RpcOpType(int pubOrPriRpcOpType){
-        return pubOrPriRpcOpType%100;
-    }
-
-    private ExchRpcOpType getExchRpcOpType(int exchOpcode){
-        if (200 < exchOpcode && exchOpcode <= 250){
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_MAIL;
-        } else if (250 < exchOpcode && exchOpcode <= 300) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_APPOINTMENT;
-        } else if (300 < exchOpcode && exchOpcode <= 350) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_CONTACT;
-        } else if (350 < exchOpcode && exchOpcode <= 400) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_TASK;
+    /**
+     * M365 application classification of packet according to opcode, like Exchange/Sharepoint...
+     * @param pubOrPriRpcOpType
+     * @return
+     */
+    private M365RpcOpType getM365RpcOpType(int pubOrPriRpcOpType){
+        if (100 <= pubOrPriRpcOpType && pubOrPriRpcOpType < 200){
+            return M365RpcOpType.M365_RPC_OP_TYPE_COMMON;
+        } else if (200 <= pubOrPriRpcOpType && pubOrPriRpcOpType < 400) {
+            return M365RpcOpType.M365_RPC_OP_TYPE_EXCH;
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Exchange Online&Exhchange Server type classification of packet according to opcode, like mail|appointment|contact|task
+     * @param exchOpcode
+     * @return
+     */
+    private ExchRpcOpType getExchRpcOpType(int exchOpcode){
+        if (250 <= exchOpcode && exchOpcode < 300){
+            return ExchRpcOpType.EXCH_RPC_OP_TYPE_MAIL;
+        } else if (300 <= exchOpcode && exchOpcode < 350) {
+            return ExchRpcOpType.EXCH_RPC_OP_TYPE_APPOINTMENT;
+        } else if (350 <= exchOpcode && exchOpcode < 400) {
+            return ExchRpcOpType.EXCH_RPC_OP_TYPE_CONTACT;
+        } else if (400 <= exchOpcode && exchOpcode < 450) {
+            return ExchRpcOpType.EXCH_RPC_OP_TYPE_TASK;
+        } else {
+            return ExchRpcOpType.EXCH_RPC_OP_TYPE_COMMON;
         }
     }
 

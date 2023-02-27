@@ -59,6 +59,7 @@ public class M365_common_rpc_message_define {
 
     /**
      * Set common rpc operation of M365, including m365_client_manager,m365_client_transfer
+     * number : 100~200
      */
     public static enum M365CommonRpcOpcode{
         M365_COMMON_RPC_OPCODE_DETECT_ENV(100),
