@@ -11,7 +11,7 @@
  *
  ***********************************************************************/
 
-package m365_proxy.m365_rpc_client;
+package m365_proxy.m365_rpc_message;
 
 public class Bd_rpc_message_define {
     public enum BdRpcOpType {
@@ -25,7 +25,7 @@ public class Bd_rpc_message_define {
             opType = value;
         }
 
-        private int getCode() {
+        public int getCode() {
             return opType;
         }
 
@@ -41,19 +41,19 @@ public class Bd_rpc_message_define {
     }
 
     public static class BdCommonRpcMessageHeader{
-        public int bd_common_rpc_message_header_size;
-        public int op_type;
-        public int need_response;
-        public long opcode;
-        public long body_len;
+        public int bd_common_rpc_message_header_size = 16;
+        public int op_type = 0;
+        public int need_response = 0;
+        public long opcode = 0;
+        public long body_len = 0;
+    }
 
-        public BdCommonRpcMessageHeader(){
-            bd_common_rpc_message_header_size = 16;
-            op_type = 0;
-            need_response = 0;
-            opcode = 0;
-            body_len = 0;
-        }
+    public static class BdCommonRpcAskMessageHeader{
+        public long op_type = 0;
+        public long opcode = 0;
+        public long reserved = 0;
+        public long error_code = 0;
+        public long body_len = 0;
     }
 }
 

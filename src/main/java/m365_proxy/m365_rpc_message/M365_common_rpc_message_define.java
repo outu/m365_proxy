@@ -19,7 +19,7 @@
  *
  ***********************************************************************/
 
-package m365_proxy.m365_rpc_client;
+package m365_proxy.m365_rpc_message;
 
 /**
  *
@@ -75,7 +75,7 @@ public class M365_common_rpc_message_define {
             opCode = value;
         }
 
-        private int getOpCode() {
+        public int getOpCode() {
             return opCode;
         }
 
@@ -88,6 +88,30 @@ public class M365_common_rpc_message_define {
 
             return null;
         }
+    }
+
+    public static class M365AzureADAppCertInfo{
+        public String cert_name = "";
+        public String cert_content = "";
+        public String cert_password = "";
+        public String cert_finger = "";
+    }
+
+    public static class M365AuthAppsInfo{
+        public int is_exch_auth = 0;
+        public int is_sharepoint_auth = 0;
+        public int is_oneDrive_auth = 0;
+        public int is_teams_auth = 0;
+    }
+
+    public static class M365CommonDetectEnvMessage{
+        public int region = 0;
+        public String tenant_Uuid = "";
+        public String app_uuid = "";
+        public String app_secret = "";
+        public String username = "";
+        public M365AuthAppsInfo auth_apps = null;
+        public M365AzureADAppCertInfo app_cert_info = null;
     }
 
     public static class M365CommonGetUserMessage{

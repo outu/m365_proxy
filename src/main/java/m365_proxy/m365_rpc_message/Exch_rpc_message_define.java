@@ -11,7 +11,7 @@
  *
  ***********************************************************************/
 
-package m365_proxy.m365_rpc_client;
+package m365_proxy.m365_rpc_message;
 
 public class Exch_rpc_message_define {
 
@@ -45,7 +45,7 @@ public class Exch_rpc_message_define {
 
     /**
      * Set common rpc operation of M365, including m365_client_manager,m365_client_transfer
-     * number : 200~400
+     * number : 200~500
      */
     public enum ExchRpcOpcode{
         /******************************************* exch common type: 201~250 *****************************************/

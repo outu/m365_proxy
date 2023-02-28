@@ -13,7 +13,9 @@
 
 package common;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class TypeConversion {
 
@@ -86,6 +88,29 @@ public class TypeConversion {
         bytes[2] = (byte) (longNum >> 16);
         bytes[1] = (byte) (longNum >> 8);
         bytes[0] = (byte) longNum;
+        return bytes;
+    }
+
+    public static String byteBufferToString(ByteBuffer byteBuffer) {
+        String byteBufferString;
+        try {
+            byteBufferString = new String(byteBuffer.array(), StandardCharsets.UTF_8);
+        } catch (Exception e){
+            byteBufferString = "";
+        }
+
+        return byteBufferString;
+    }
+
+    public static byte[] stringToBytes(String string){
+        byte[] bytes;
+
+        try{
+            bytes = string.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e){
+            bytes = null;
+        }
+
         return bytes;
     }
 }

@@ -1,7 +1,7 @@
 package apis;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.microsoft.aad.msal4j.ClientCredentialFactory;
 import com.microsoft.aad.msal4j.ClientCredentialParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
@@ -72,9 +72,10 @@ public class BaseRequest {
                     .authority(instance)
                     .build();
         } else {
-            JsonObject appCertInfoJsonObject = JsonParser.parseString(appCertInfo).getAsJsonObject();
-            String certContent = appCertInfoJsonObject.get("cert_content").getAsString();
-            String certPassword = appCertInfoJsonObject.get("cert_password").getAsString();
+            JSONObject appCertInfoJsonObject = new JSONObject(JSON.parseObject(appCertInfo));
+            appCertInfoJsonObject.get("cert_content");
+            String certContent = appCertInfoJsonObject.get("cert_content").toString();
+            String certPassword = appCertInfoJsonObject.get("cert_password").toString();
 
             InputStream pkcs12Certificate = new ByteArrayInputStream(certContent.getBytes());
             app = ConfidentialClientApplication.builder(

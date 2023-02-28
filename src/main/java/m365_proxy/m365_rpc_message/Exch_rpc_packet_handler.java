@@ -11,7 +11,7 @@
  *
  ***********************************************************************/
 
-package m365_proxy.m365_rpc_client;
+package m365_proxy.m365_rpc_message;
 
 public class Exch_rpc_packet_handler {
 }

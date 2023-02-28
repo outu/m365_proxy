@@ -15,12 +15,16 @@ package m365_proxy;
 
 import common.TypeConversion;
 
-import m365_proxy.m365_rpc_client.Bd_rpc_message_define.BdCommonRpcMessageHeader;
-import m365_proxy.m365_rpc_client.Bd_rpc_message_define.BdRpcOpType;
-import m365_proxy.m365_rpc_client.Exch_rpc_message_define.ExchRpcOpType;
-import m365_proxy.m365_rpc_client.Exch_rpc_message_define.ExchRpcOpcode;
-import m365_proxy.m365_rpc_client.M365_common_rpc_message_define.M365RpcOpType;
-import m365_proxy.m365_rpc_client.M365_common_rpc_message_define.M365CommonRpcOpcode;
+import m365_proxy.m365_rpc_message.Bd_rpc_message_define;
+import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdCommonRpcMessageHeader;
+import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdCommonRpcAskMessageHeader;
+import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdRpcOpType;
+import m365_proxy.m365_rpc_message.Exch_rpc_message_define.ExchRpcOpType;
+import m365_proxy.m365_rpc_message.M365_common_rpc_message_define;
+import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365CommonDetectEnvMessage;
+import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365RpcOpType;
+import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365CommonRpcOpcode;
+import m365_proxy.m365_rpc_message.M365_common_rpc_packet_handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static m365_proxy.m365_rpc_client.M365_common_rpc_message_define.M365_DEFAULT_RPC_TIMEOUT;
+import static m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365_DEFAULT_RPC_TIMEOUT;
 
 public class M365_proxy_rpc_server {
     public static final Logger logger = LoggerFactory.getLogger(M365_proxy_rpc_server.class);
@@ -109,8 +113,6 @@ public class M365_proxy_rpc_server {
             //build and send ask message
 
         }
-
-        System.out.println("socket finished!!!");
     }
 
     /**
@@ -121,11 +123,11 @@ public class M365_proxy_rpc_server {
      * @return
      * @throws InterruptedException
      */
-    public boolean handleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException {
+    public boolean handleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException
+    {
         M365RpcOpType m365RpcOpType = getM365RpcOpType(privateRpcOpcode);
         boolean ret = true;
 
-        logger.debug("handle private packet....");
         switch (m365RpcOpType){
             case M365_RPC_OP_TYPE_COMMON:
                 ret = handleRpcM365CommonPacket(privateRpcOpcode, byteBuffer, length);
@@ -162,11 +164,10 @@ public class M365_proxy_rpc_server {
      */
     public boolean handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
         boolean ret = true;
-        logger.debug("handle private->m365 common packet....");
 
         switch (M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode)){
             case M365_COMMON_RPC_OPCODE_DETECT_ENV:
-                ret = handleRpcM365CommonPacket(m365CommonRpcCode, byteBuffer, length);
+                ret = handleDetectM365Env(byteBuffer, length);
                 break;
             case M365_COMMON_RPC_OPCODE_GET_USER_LIST:
                 ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
@@ -302,7 +303,7 @@ public class M365_proxy_rpc_server {
     }
 
     /**
-     * Exchange Online&Exhchange Server type classification of packet according to opcode, like mail|appointment|contact|task
+     * @deprecated Exchange Online&Exhchange Server type classification of packet according to opcode, like mail|appointment|contact|task
      * @param exchOpcode
      * @return
      */
@@ -320,9 +321,31 @@ public class M365_proxy_rpc_server {
         }
     }
 
-    private String handleGetUser(){
-        M365_proxy_operation m365ProxyOp = new M365_proxy_operation();
-        return m365ProxyOp.getUserInfo();
+    /**
+     * @deprecated Environmental detection of Microsoft 365
+     * @param byteBuffer
+     * @param length
+     * @return
+     */
+    private boolean handleDetectM365Env(ByteBuffer byteBuffer, long length){
+        boolean ret = true;
+
+        try {
+            String jsonString = TypeConversion.byteBufferToString(byteBuffer);
+            M365CommonDetectEnvMessage message = M365_common_rpc_packet_handler.toMessage.TransformM365CommonDetectEnvInfo(jsonString);
+
+            M365_proxy_operation m365ProxyOp = new M365_proxy_operation();
+            String detectM365EnvAskInfo = m365ProxyOp.detectM365Env(message);
+            byte[] askInfo = TypeConversion.stringToBytes(detectM365EnvAskInfo);
+            buildAndSendAskMsg(M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo);
+
+        } catch (Exception e){
+            logger.error("handle detect m365 env failed: " + e.getMessage());
+            //send error
+            ret = false;
+        }
+
+        return ret;
     }
 
 
@@ -342,6 +365,71 @@ public class M365_proxy_rpc_server {
         }
 
         return byteBuffer;
+    }
+
+    private boolean send(byte[] sendPacket){
+        ByteBuffer sendBuffer = ByteBuffer.wrap(sendPacket);
+        int needSendLength = sendBuffer.capacity();
+
+        while (true){
+            try{
+                int sendLength = _clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
+                if (sendLength != needSendLength){
+                    return false;
+                }
+            } catch (ExecutionException | InterruptedException | TimeoutException e){
+                return false;
+            }
+        }
+    }
+
+    public boolean buildAndSendAskMsg(int opcode, byte[] askData){
+        boolean ret = true;
+
+        byte[] askHeader = buildAskHeader(opcode, askData.length + 1);
+        byte[] sendPacket = new byte[askHeader.length + askData.length + 1];
+        System.arraycopy(askHeader, 0, sendPacket, 0, askHeader.length);
+        System.arraycopy(askData, 0, sendPacket, askHeader.length, askData.length);
+
+        ret = send(sendPacket);
+
+        return ret;
+    }
+
+    public boolean sendAskMsg(int rpcOpType, int askOpCode, int errorCode){
+        boolean ret = true;
+
+        byte[] askHeader  = new byte[24];
+        byte[] op_type    = TypeConversion.intToBytes(rpcOpType);
+        byte[] opcode     = TypeConversion.intToBytes(askOpCode);
+        byte[] reserved   = TypeConversion.intToBytes(0);
+        byte[] error_code = TypeConversion.intToBytes(errorCode);
+        byte[] body_len   = TypeConversion.longToBytes(0);
+        System.arraycopy(op_type, 0, askHeader, 0, op_type.length);
+        System.arraycopy(opcode, 0, askHeader, 4, opcode.length);
+        System.arraycopy(reserved, 0, askHeader, 8, reserved.length);
+        System.arraycopy(error_code, 0, askHeader, 12, error_code.length);
+        System.arraycopy(body_len, 0, askHeader, 16, body_len.length);
+
+        ret = send(askHeader);
+
+        return ret;
+    }
+
+    public byte[] buildAskHeader(int askOpCode, int bodyLength){
+        byte[] askHeader  = new byte[24];
+        byte[] op_type    = TypeConversion.intToBytes(BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode());
+        byte[] opcode     = TypeConversion.intToBytes(askOpCode);
+        byte[] reserved   = TypeConversion.intToBytes(0);
+        byte[] error_code = TypeConversion.intToBytes(0);
+        byte[] body_len   = TypeConversion.longToBytes(bodyLength);
+        System.arraycopy(op_type, 0, askHeader, 0, op_type.length);
+        System.arraycopy(opcode, 0, askHeader, 4, opcode.length);
+        System.arraycopy(reserved, 0, askHeader, 8, reserved.length);
+        System.arraycopy(error_code, 0, askHeader, 12, error_code.length);
+        System.arraycopy(body_len, 0, askHeader, 16, body_len.length);
+
+        return askHeader;
     }
 
     private BdCommonRpcMessageHeader parseBdCommonRpcMessageHeader(ByteBuffer byteBuffer){

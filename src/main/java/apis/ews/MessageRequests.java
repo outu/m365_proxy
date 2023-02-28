@@ -112,7 +112,7 @@ public class MessageRequests extends EwsBaseRequest {
             messageInfo.put("body", message.getBody().toString().replace("\r\n", ""));
             messageInfo.put("recv_date", message.getDateTimeReceived());
             messageInfo.put("recipents", getEmailAddressFromCollection(message.getToRecipients()));
-            messageInfo.put("sender", message.getSender().getAddress());
+            messageInfo.put("sender", message.getSender() != null ? message.getSender().getAddress() : "");
             messageInfo.put("cc", getEmailAddressFromCollection(message.getCcRecipients()));
             messageInfo.put("change_type", itemChange.getChangeType().toString());
             messageInfo.put("size", message.getSize());

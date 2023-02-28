@@ -44,7 +44,7 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
             logger.debug("accept one connection: " + socketChannel.getRemoteAddress());
 
             addMapThreadUuidToThreadObj(attachment);
-            logger.debug("add thread: " + _threadUuid + "to map thread obj");
+            logger.debug("add thread: " + _threadUuid + " to map thread obj");
 
             _clientChannel = socketChannel;
             M365_proxy_rpc_server rpcServer = new M365_proxy_rpc_server();

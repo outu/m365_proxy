@@ -25,7 +25,7 @@ public class testOuth {
     public List<Map>getExchangeServerSoapClient(String mailbox){
         Map<String, String> organizationAuthParameters = new HashMap<String, String>();
         organizationAuthParameters.put("username", "Administrator@exch.com.cn");
-        organizationAuthParameters.put("password", "backup@123456789");
+        organizationAuthParameters.put("password", "backup@1234567890");
         organizationAuthParameters.put("domain", "WIN-TT7P7PN7QHJ.exch.com.cn");
         organizationAuthParameters.put("region", "100");
 
@@ -67,7 +67,7 @@ public class testOuth {
     public ExchangeService getExchangeServerEwsClient(String mailbox){
         Map<String, String> organizationAuthParameters = new HashMap<String, String>();
         organizationAuthParameters.put("username", "Administrator@exch.com.cn");
-        organizationAuthParameters.put("password", "backup@123456789");
+        organizationAuthParameters.put("password", "backup@1234567890");
         organizationAuthParameters.put("domain", "WIN-TT7P7PN7QHJ.exch.com.cn");
         organizationAuthParameters.put("region", "100");
 
@@ -116,7 +116,7 @@ public class testOuth {
 
         Map<String, String> organizationAuthParameters = new HashMap<String, String>();
         organizationAuthParameters.put("username", "Administrator@exch.com.cn");
-        organizationAuthParameters.put("password", "backup@123456789");
+        organizationAuthParameters.put("password", "backup@1234567890");
         organizationAuthParameters.put("domain", "WIN-TT7P7PN7QHJ.exch.com.cn");
         organizationAuthParameters.put("region", "100");
 
@@ -135,7 +135,7 @@ public class testOuth {
 
         apis.soap.MailRequests mailRequests = new apis.soap.MailRequests(soapClientCache);
         XmlRequestData xmlRequestData = new XmlRequestData();
-        String xmlToGetMailMessage = xmlRequestData.buildXmlToGetMailMimeContent("test1@exch.com.cn", "AQMkAGJkZmFlNGJkLWM0NjEtNDU4Zi04NzhmLTNhNWE3OWYxMDFkOABGAAAD/21pFKhtgUqKvYTQLkeOAAcAqbn2gdfe6UikHCgMkkbpBQAAAgEPAAAAqbn2gdfe6UikHCgMkkbpBQAAAhjdAAAA");
+        String xmlToGetMailMessage = xmlRequestData.buildXmlToGetMailMimeContent("administrator@exch.com.cn", "AAMkAGE5NzcxZjBiLWI0Y2MtNDhlNy1hZjViLTQ0NzZiMmQzN2Q1ZABGAAAAAACC2Y8PhSFoQo3NQPbM2L49BwBcaT0SLAv6S6PqbrxnTa5XAAAAAAEMAABcaT0SLAv6S6PqbrxnTa5XAACKj7hrAAA=");
 
 
         HttpResponse httpResponse = mailRequests.getResponseWithMimeContent(xmlToGetMailMessage);
@@ -174,7 +174,7 @@ public class testOuth {
 
     private static byte[] toBytes(char[] chars) {
         CharBuffer charBuffer = CharBuffer.wrap(chars);
-        ByteBuffer byteBuffer = Charset.forName("UTF-8").encode(charBuffer);
+        ByteBuffer byteBuffer = Charset.forName("ISO-8859-1").encode(charBuffer);
         byte[] bytes = Arrays.copyOfRange(byteBuffer.array(),
                 byteBuffer.position(), byteBuffer.limit());
         Arrays.fill(byteBuffer.array(), (byte) 0); // clear sensitive data
