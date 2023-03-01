@@ -15,16 +15,11 @@ package m365_proxy;
 
 import common.TypeConversion;
 
-import m365_proxy.m365_rpc_message.Bd_rpc_message_define;
 import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdCommonRpcMessageHeader;
-import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdCommonRpcAskMessageHeader;
 import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdRpcOpType;
-import m365_proxy.m365_rpc_message.Exch_rpc_message_define.ExchRpcOpType;
-import m365_proxy.m365_rpc_message.M365_common_rpc_message_define;
-import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365CommonDetectEnvMessage;
 import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365RpcOpType;
-import m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365CommonRpcOpcode;
-import m365_proxy.m365_rpc_message.M365_common_rpc_packet_handler;
+import m365_proxy.m365_rpc_server_handler.Exch_rpc_server_handler;
+import m365_proxy.m365_rpc_server_handler.M365_common_rpc_server_handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +34,8 @@ import static m365_proxy.m365_rpc_message.M365_common_rpc_message_define.M365_DE
 
 public class M365_proxy_rpc_server {
     public static final Logger logger = LoggerFactory.getLogger(M365_proxy_rpc_server.class);
-    private AsynchronousSocketChannel _clientChannel;
-    private M365_proxy_listen_connection _clientAttachment;
+    protected AsynchronousSocketChannel _clientChannel;
+    protected M365_proxy_listen_connection _clientAttachment;
 
     /**
      * thread manager control child socket thread destroy flag
@@ -116,7 +111,7 @@ public class M365_proxy_rpc_server {
     }
 
     /**
-     * handle rpc private packet
+     * @Description handle rpc private packet
      * @param privateRpcOpcode
      * @param byteBuffer
      * @param length
@@ -130,10 +125,16 @@ public class M365_proxy_rpc_server {
 
         switch (m365RpcOpType){
             case M365_RPC_OP_TYPE_COMMON:
-                ret = handleRpcM365CommonPacket(privateRpcOpcode, byteBuffer, length);
+                M365_common_rpc_server_handler commonRpcHandler = new M365_common_rpc_server_handler();
+                commonRpcHandler.init(_clientChannel, _clientAttachment);
+                ret = commonRpcHandler.handleRpcM365CommonPacket(privateRpcOpcode, byteBuffer, length);
+                commonRpcHandler.destroy();
                 break;
             case M365_RPC_OP_TYPE_EXCH:
-                ret = handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
+                Exch_rpc_server_handler exchRpcHandler = new Exch_rpc_server_handler();
+                exchRpcHandler.handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
+                ret = exchRpcHandler.handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
+                exchRpcHandler.destroy();
                 break;
             default:
                 ret = false;
@@ -145,7 +146,7 @@ public class M365_proxy_rpc_server {
     }
 
     /**
-     * handle rpc public packet
+     * @Description handle rpc public packet
      * @param publicRpcOpcode
      * @param byteBuffer
      * @param length
@@ -156,139 +157,7 @@ public class M365_proxy_rpc_server {
     }
 
     /**
-     * handle rpc m365 common packet
-     * @param m365CommonRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
-        boolean ret = true;
-
-        switch (M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode)){
-            case M365_COMMON_RPC_OPCODE_DETECT_ENV:
-                ret = handleDetectM365Env(byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_OPCODE_GET_USER_LIST:
-                ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_OPCODE_GET_GROUP_LIST:
-                ret = handleRpcM365CommonPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_OPCODE_CONNECT_USER:
-                ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_OPCODE_CONNECT_GROUP:
-                ret = handleRpcM365CommonPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_IS_USER_EXISTS:
-                ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            default:
-                ret = false;
-                logger.warn("unknown M365 rpc opcode.");
-                break;
-        }
-
-        return ret;
-    }
-
-    /**
-     * handle Exchange online&Exchange Server packet
-     * @param exchRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchPacket(int exchRpcCode, ByteBuffer byteBuffer, long length){
-        boolean ret = true;
-        ExchRpcOpType exchRpcOpType = getExchRpcOpType(exchRpcCode);
-        logger.debug("handle private->m365 exch packet....");
-
-        switch (exchRpcOpType){
-            case EXCH_RPC_OP_TYPE_MAIL:
-                ret = handleRpcExchMailPacket(exchRpcCode, byteBuffer, length);
-                break;
-            case EXCH_RPC_OP_TYPE_APPOINTMENT:
-                ret = handleRpcExchAppointmentPacket(exchRpcCode, byteBuffer, length);
-                break;
-            case EXCH_RPC_OP_TYPE_CONTACT:
-                ret = handleRpcExchContactPacket(exchRpcCode, byteBuffer, length);
-                break;
-            case EXCH_RPC_OP_TYPE_TASK:
-                ret = handleRpcExchTaskPacket(exchRpcCode, byteBuffer, length);
-                break;
-            default:
-                logger.debug("111111111111111111111111111111111111....");
-                ret = handleRpcExchCommonPacket(exchRpcCode, byteBuffer, length);
-                break;
-        }
-
-        return ret;
-    }
-
-    /**
-     * handle mail rpc packet in Exchange Online&Exchange Server with M365
-     * @param mailRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchMailPacket(int mailRpcCode, ByteBuffer byteBuffer, long length){
-        logger.debug("handle private->m365 common-> mail packet....");
-        return true;
-    }
-
-    /**
-     * handle mail rpc packet in Exchange Online&Exchange Server with M365
-     * @param appointmentRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchAppointmentPacket(int appointmentRpcCode, ByteBuffer byteBuffer, long length){
-        logger.debug("handle private->m365 exch-> appointment packet....");
-        return true;
-    }
-
-    /**
-     * handle mail rpc packet in Exchange Online&Exchange Server with M365
-     * @param contactRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchContactPacket(int contactRpcCode, ByteBuffer byteBuffer, long length){
-        logger.debug("handle private->m365 exch-> contact packet....");
-        return true;
-    }
-
-    /**
-     * handle mail rpc packet in Exchange Online&Exchange Server with M365
-     * @param taskRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchTaskPacket(int taskRpcCode, ByteBuffer byteBuffer, long length){
-        logger.debug("handle private->m365 exch-> task packet....");
-        return true;
-    }
-
-    /**
-     * handle mail rpc packet in Exchange Online&Exchange Server with M365
-     * @param exchCommonRpcCode
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    public boolean handleRpcExchCommonPacket(int exchCommonRpcCode, ByteBuffer byteBuffer, long length){
-        logger.debug("handle private->m365 exch-> common packet....");
-        return true;
-    }
-
-    /**
-     * M365 application classification of packet according to opcode, like Exchange/Sharepoint...
+     * @Description M365 application classification of packet according to opcode, like Exchange/Sharepoint...
      * @param pubOrPriRpcOpType
      * @return
      */
@@ -302,88 +171,40 @@ public class M365_proxy_rpc_server {
         }
     }
 
-    /**
-     * @deprecated Exchange Online&Exhchange Server type classification of packet according to opcode, like mail|appointment|contact|task
-     * @param exchOpcode
-     * @return
-     */
-    private ExchRpcOpType getExchRpcOpType(int exchOpcode){
-        if (250 <= exchOpcode && exchOpcode < 300){
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_MAIL;
-        } else if (300 <= exchOpcode && exchOpcode < 350) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_APPOINTMENT;
-        } else if (350 <= exchOpcode && exchOpcode < 400) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_CONTACT;
-        } else if (400 <= exchOpcode && exchOpcode < 450) {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_TASK;
-        } else {
-            return ExchRpcOpType.EXCH_RPC_OP_TYPE_COMMON;
+    protected ByteBuffer recv(int length){
+        ByteBuffer byteBuffer = ByteBuffer.allocate(length);
+
+        try{
+            int recvLength = _clientChannel.read(byteBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
+            if (recvLength < 0){
+                return null;
+            }
+        } catch (ExecutionException | InterruptedException | TimeoutException e){
+            return null;
         }
+
+        return byteBuffer;
     }
 
-    /**
-     * @deprecated Environmental detection of Microsoft 365
-     * @param byteBuffer
-     * @param length
-     * @return
-     */
-    private boolean handleDetectM365Env(ByteBuffer byteBuffer, long length){
+    protected boolean send(byte[] sendPacket){
         boolean ret = true;
 
-        try {
-            String jsonString = TypeConversion.byteBufferToString(byteBuffer);
-            M365CommonDetectEnvMessage message = M365_common_rpc_packet_handler.toMessage.TransformM365CommonDetectEnvInfo(jsonString);
+        ByteBuffer sendBuffer = ByteBuffer.wrap(sendPacket);
+        int needSendLength = sendBuffer.capacity();
 
-            M365_proxy_operation m365ProxyOp = new M365_proxy_operation();
-            String detectM365EnvAskInfo = m365ProxyOp.detectM365Env(message);
-            byte[] askInfo = TypeConversion.stringToBytes(detectM365EnvAskInfo);
-            buildAndSendAskMsg(M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo);
-
-        } catch (Exception e){
-            logger.error("handle detect m365 env failed: " + e.getMessage());
-            //send error
+        try{
+            int sendLength = _clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
+            if (sendLength != needSendLength){
+                ret = false;
+            }
+        } catch (ExecutionException | InterruptedException | TimeoutException e){
             ret = false;
         }
 
         return ret;
     }
 
-
-    private ByteBuffer recv(int length){
-        ByteBuffer byteBuffer = ByteBuffer.allocate(length);
-
-        while (true){
-            try{
-                int recvLength = _clientChannel.read(byteBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
-                if (recvLength < 0){
-                    return null;
-                }
-                break;
-            } catch (ExecutionException | InterruptedException | TimeoutException e){
-                return null;
-            }
-        }
-
-        return byteBuffer;
-    }
-
-    private boolean send(byte[] sendPacket){
-        ByteBuffer sendBuffer = ByteBuffer.wrap(sendPacket);
-        int needSendLength = sendBuffer.capacity();
-
-        while (true){
-            try{
-                int sendLength = _clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
-                if (sendLength != needSendLength){
-                    return false;
-                }
-            } catch (ExecutionException | InterruptedException | TimeoutException e){
-                return false;
-            }
-        }
-    }
-
-    public boolean buildAndSendAskMsg(int opcode, byte[] askData){
+    protected boolean buildAndSendAskMsg(int opcode, byte[] askData){
         boolean ret = true;
 
         byte[] askHeader = buildAskHeader(opcode, askData.length + 1);
@@ -396,7 +217,7 @@ public class M365_proxy_rpc_server {
         return ret;
     }
 
-    public boolean sendAskMsg(int rpcOpType, int askOpCode, int errorCode){
+    protected boolean sendAskMsg(int rpcOpType, int askOpCode, int errorCode){
         boolean ret = true;
 
         byte[] askHeader  = new byte[24];
@@ -416,7 +237,7 @@ public class M365_proxy_rpc_server {
         return ret;
     }
 
-    public byte[] buildAskHeader(int askOpCode, int bodyLength){
+    protected byte[] buildAskHeader(int askOpCode, int bodyLength){
         byte[] askHeader  = new byte[24];
         byte[] op_type    = TypeConversion.intToBytes(BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode());
         byte[] opcode     = TypeConversion.intToBytes(askOpCode);
