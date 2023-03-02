@@ -22,8 +22,8 @@ public class MessageRequests extends GraphBaseRequest {
     }
 
     /**
-     * 普通获取子目录接口
-     * @param rootFolderId
+     * @Description the normal interface of get mail child folder
+     * @param rootFolderId need to get child folder of the root folder
      * @return
      * @throws Exception
      */
@@ -57,9 +57,28 @@ public class MessageRequests extends GraphBaseRequest {
 
 
     /**
-     *获取邮件类型的顶级目录
+     * @Description get mail type root folder
      * @return
      */
+    public String getFolderInfo(String folderName, int type, int folderNum) {
+        MailFolder mailFolder = graphClient.users(backupUserId).mailFolders(folderName)
+                .buildRequest()
+                .select("id,displayName,parentFolderId")
+                .get();
+
+        if (mailFolder == null){
+            return "";
+        }
+
+        JSONObject folderInfo = new JSONObject();
+        folderInfo.put("folder_id", mailFolder.id);
+        folderInfo.put("parent_folder_id", mailFolder.parentFolderId);
+        folderInfo.put("display_name", mailFolder.displayName);
+        folderInfo.put("type", type);
+        folderInfo.put("folder_num", folderNum);
+
+        return folderInfo.toJSONString();
+    }
 //    public String getRootMailFolder(){
 //        String rootMailFolderJson = "";
 //        List<String> rootMailFolderList = new ArrayList<>();

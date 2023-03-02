@@ -1,5 +1,6 @@
 package apis;
 
+import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.service.item.Appointment;
 
 public class BaseUtil {
@@ -40,7 +41,7 @@ public class BaseUtil {
             region = value;
         }
 
-        private int getCode(){
+        public int getCode(){
             return region;
         }
 
@@ -68,7 +69,7 @@ public class BaseUtil {
             type = value;
         }
 
-        private int getCode(){
+        public int getCode(){
             return type;
         }
 
@@ -76,6 +77,39 @@ public class BaseUtil {
             for (ExchDataType exchDataType : ExchDataType.values()){
                 if (exchDataType.getCode() == type){
                     return exchDataType;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public enum ExchFolderNum{
+        INBOX(0),
+        DRAFTS(1),
+        SENTITEMS(2),
+        DELETEDITEMS(3),
+        JUNKEMAIL(4),
+        ARCHIVE(5),
+        CONVERSATIONHISTORY(6),
+        CALENDAR(100),
+        CONTACTS(200),
+        TASKS(300);
+
+        private int num = 0;
+
+        private ExchFolderNum(int value){
+            num = value;
+        }
+
+        public int getNum(){
+            return num;
+        }
+
+        public static ExchFolderNum getExchFolderNum(int num){
+            for (ExchFolderNum exchFolderNum : ExchFolderNum.values()){
+                if (exchFolderNum.getNum() == num){
+                    return exchFolderNum;
                 }
             }
 

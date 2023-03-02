@@ -49,7 +49,10 @@ public class Exch_rpc_message_define {
      */
     public enum ExchRpcOpcode{
         /******************************************* exch common type: 201~250 *****************************************/
-        EXCH_RPC_OPCODE_GET_ROOT_FOLDER(200),
+        EXCH_RPC_OPCODE_DETECT_ENV(200),
+        EXCH_RPC_OPCODE_SERVICE_CONNECT_USER(201),
+        EXCH_RPC_OPCODE_ONLINE_CONNECT_USER(202),
+        EXCH_RPC_OPCODE_GET_ROOT_FOLDER(203),
         /******************************************* mail type: 251~300 *****************************************/
         EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_GRAPH(251),
         EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_EWS(252),
@@ -72,7 +75,7 @@ public class Exch_rpc_message_define {
             opCode = value;
         }
 
-        private int getOpCode() {
+        public int getOpCode() {
             return opCode;
         }
 
@@ -85,5 +88,33 @@ public class Exch_rpc_message_define {
 
             return null;
         }
+    }
+
+    public static class ExchSerDetectEnvMessage{
+        public int region = 0;
+        public String username = "";
+        public String password = "";
+        public String domain = "";
+    }
+
+    public static class ExchSerConnUserMessage{
+        public int region = 0;
+        public String username = "";
+        public String password = "";
+        public String domain = "";
+        public String mail = "";
+        public String thread_uuid = "";
+    }
+
+    public static class ExchOnConnUserMessage{
+        public int region = 0;
+        public String tenant_Uuid = "";
+        public String app_uuid = "";
+        public String app_secret = "";
+        public String username = "";
+        public String mail = "";
+        public String thread_uuid = "";
+        public M365_common_rpc_message_define.M365AuthAppsInfo auth_apps = null;
+        public M365_common_rpc_message_define.M365AzureADAppCertInfo app_cert_info = null;
     }
 }

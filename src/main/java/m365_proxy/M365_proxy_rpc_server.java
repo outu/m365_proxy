@@ -14,6 +14,7 @@
 package m365_proxy;
 
 import common.TypeConversion;
+import m365_proxy.m365_rpc_server_handler.Exch_rpc_server_handler.ExchDataCache;
 
 import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdCommonRpcMessageHeader;
 import m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdRpcOpType;
@@ -37,6 +38,8 @@ public class M365_proxy_rpc_server {
     protected AsynchronousSocketChannel _clientChannel;
     protected M365_proxy_listen_connection _clientAttachment;
 
+    protected ExchDataCache _exchDataCache = null;
+
     /**
      * thread manager control child socket thread destroy flag
      */
@@ -53,10 +56,9 @@ public class M365_proxy_rpc_server {
     }
 
     /**
-     *Loop to receive socket messages and process messages
-     * @throws InterruptedException
+     *@Description Loop to receive socket messages and process messages
      */
-    public void waitAndHandleRequest() throws InterruptedException {
+    public void waitAndHandleRequest() {
         boolean ret = true;
 
         BdCommonRpcMessageHeader rpcHeader = new BdCommonRpcMessageHeader();
@@ -104,9 +106,6 @@ public class M365_proxy_rpc_server {
             if (_destroy){
                 break;
             }
-
-            //build and send ask message
-
         }
     }
 
@@ -118,7 +117,7 @@ public class M365_proxy_rpc_server {
      * @return
      * @throws InterruptedException
      */
-    public boolean handleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length) throws InterruptedException
+    private boolean handleRpcPrivatePacket(int privateRpcOpcode, ByteBuffer byteBuffer, long length)
     {
         M365RpcOpType m365RpcOpType = getM365RpcOpType(privateRpcOpcode);
         boolean ret = true;
@@ -132,8 +131,17 @@ public class M365_proxy_rpc_server {
                 break;
             case M365_RPC_OP_TYPE_EXCH:
                 Exch_rpc_server_handler exchRpcHandler = new Exch_rpc_server_handler();
-                exchRpcHandler.handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
+                exchRpcHandler.init(_clientChannel, _clientAttachment);
+
+                if (_exchDataCache != null){
+                    exchRpcHandler.setExchDataCache(_exchDataCache);
+                }
+
                 ret = exchRpcHandler.handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
+
+                if (_exchDataCache == null && exchRpcHandler.getExchDataCache() != null){
+                    _exchDataCache = exchRpcHandler.getExchDataCache();
+                }
                 exchRpcHandler.destroy();
                 break;
             default:
@@ -152,7 +160,7 @@ public class M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    public boolean handleRpcPublicPacket(int publicRpcOpcode, ByteBuffer byteBuffer, long length){
+    private boolean handleRpcPublicPacket(int publicRpcOpcode, ByteBuffer byteBuffer, long length){
         return true;
     }
 

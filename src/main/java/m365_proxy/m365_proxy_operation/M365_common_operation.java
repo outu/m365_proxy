@@ -15,6 +15,8 @@ package m365_proxy.m365_proxy_operation;
 
 import apis.ews.EwsBaseRequest;
 import apis.ews.FolderRequests;
+import apis.graph.GraphBaseRequest;
+import apis.graph.common.UserRequests;
 import com.alibaba.fastjson.JSON;
 import m365_proxy.m365_rpc_message.M365_common_rpc_message_define;
 import microsoft.exchange.webservices.data.core.ExchangeService;
@@ -32,18 +34,25 @@ public class M365_common_operation {
         organizationAuthParameters.put("appSecret", m365CommonDetectEnvMessage.app_secret);
         organizationAuthParameters.put("region", String.valueOf(m365CommonDetectEnvMessage.region));
         organizationAuthParameters.put("appCertInfo", m365CommonDetectEnvMessage.app_secret != "" ? null : JSON.toJSONString(m365CommonDetectEnvMessage.app_cert_info));
-        EwsBaseRequest ewsBaseRequest = new EwsBaseRequest(organizationAuthParameters);
-        ewsBaseRequest.setEwsClient(m365CommonDetectEnvMessage.username);
+        GraphBaseRequest graphBaseRequest = new GraphBaseRequest(organizationAuthParameters);
+        graphBaseRequest.setGraphClient();
+        UserRequests userRequests = new UserRequests(graphBaseRequest.getGraphClient());
+        String userInfo = userRequests.syncUserInfo("", "");
 
 
-        ExchangeService ewsClient = ewsBaseRequest.getEwsClient();
-        FolderRequests folderRequests = new FolderRequests(ewsClient);
-        String jsonFolder = folderRequests.getAllTypeRootFolder();
+
+//        EwsBaseRequest ewsBaseRequest = new EwsBaseRequest(organizationAuthParameters);
+//        ewsBaseRequest.setEwsClient(m365CommonDetectEnvMessage.username);
+//
+//
+//        ExchangeService ewsClient = ewsBaseRequest.getEwsClient();
+//        FolderRequests folderRequests = new FolderRequests(ewsClient);
+//        String jsonFolder = folderRequests.getAllTypeRootFolder();
 
 
 
         detectResult = "{\"ews\":0,\"graph\":1}";
 
-        return jsonFolder;
+        return userInfo;
     }
 }

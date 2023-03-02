@@ -2,6 +2,7 @@ package apis.ews;
 
 import apis.BaseUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
@@ -16,6 +17,19 @@ public class FolderRequests extends EwsBaseRequest{
         ewsClient = ewsClientCache;
     }
 
+    public String getFolderInfo(WellKnownFolderName folderName, int type, int folderNum) throws Exception {
+        Folder folder = Folder.bind(ewsClient, folderName);
+        JSONObject folderInfo = new JSONObject();
+        folderInfo.put("folder_id", folder.getId().getUniqueId());
+        folderInfo.put("parent_folder_id", folder.getParentFolderId().getUniqueId());
+        folderInfo.put("display_name", folder.getDisplayName());
+        folderInfo.put("type", type);
+        folderInfo.put("folder_num", folderNum);
+
+        return folderInfo.toJSONString();
+    }
+
+
 
     /**
      * 获取Exchange Server and Exchange Online各种类型顶级目录
@@ -29,9 +43,9 @@ public class FolderRequests extends EwsBaseRequest{
         Folder folder = Folder.bind(ewsClient, WellKnownFolderName.MsgFolderRoot);
         FindFoldersResults findFolderResults = folder.findFolders(new FolderView(EwsUtil.MAX_ROOT_FOLDER_COUNT));
 
-        for (Folder item : findFolderResults.getFolders()){
+        for (Folder item : findFolderResults.getFolders()) {
             int type = getRootFolderType(item.getFolderClass());
-            if (type == -1){
+            if (type == -1) {
                 continue;
             }
             JSONObject oneRootMailFolder = new JSONObject();
@@ -48,7 +62,8 @@ public class FolderRequests extends EwsBaseRequest{
     }
 
 
-    public int getRootFolderType(String rootFolderType){
+
+        public int getRootFolderType(String rootFolderType){
         int type;
 
         if (rootFolderType == null){

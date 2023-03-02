@@ -45,12 +45,6 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
             case M365_COMMON_RPC_OPCODE_GET_GROUP_LIST:
                // ret = handleRpcM365CommonPacket(m365CommonRpcCode, byteBuffer, length);
                 break;
-            case M365_COMMON_RPC_OPCODE_CONNECT_USER:
-                //ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
-            case M365_COMMON_RPC_OPCODE_CONNECT_GROUP:
-               // ret = handleRpcM365CommonPacket(m365CommonRpcCode, byteBuffer, length);
-                break;
             case M365_COMMON_RPC_IS_USER_EXISTS:
                // ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
                 break;
@@ -80,7 +74,6 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
             String detectM365EnvAskInfo = m365CommonOp.detectM365Env(message);
             byte[] askInfo = TypeConversion.stringToBytes(detectM365EnvAskInfo);
             buildAndSendAskMsg(M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo);
-
         } catch (Exception e){
             logger.error("handle detect m365 env failed: " + e.getMessage());
             //send error
