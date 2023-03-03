@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static m365_proxy.M365_proxy_error.BdErrorCode.*;
+
 public class M365_proxy_listen_connection {
 
     public static final Logger logger = LoggerFactory.getLogger(M365_proxy_listen_connection.class);
@@ -65,13 +67,13 @@ public class M365_proxy_listen_connection {
      * @Description start socket listening
      * @return true-success false-failed
      */
-    public Boolean run() throws RuntimeException, IOException {
-        boolean ret = true;
-        // Initialize fixed length thread pool
-        _executorService = Executors.newFixedThreadPool(_threadPoolNum);
-        _channelGroup = AsynchronousChannelGroup.withThreadPool(_executorService);
+    public int run() {
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         try {
+            // Initialize fixed length thread pool
+            _executorService = Executors.newFixedThreadPool(_threadPoolNum);
+            _channelGroup = AsynchronousChannelGroup.withThreadPool(_executorService);
             // Init AsynchronousServerSocketChannel
             _serverChannel = AsynchronousServerSocketChannel.open(_channelGroup);
             _serverChannel.bind(new InetSocketAddress(_listenPort));
@@ -92,10 +94,10 @@ public class M365_proxy_listen_connection {
                 TimeUnit.SECONDS.sleep(1L);
             }
             destroy();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | RuntimeException e) {
             logger.error("start socket listening error: " + e.getMessage());
             destroy();
-            ret = false;
+            ret = BD_NET_BIND_ERROR.getCode();
         }
 
         return ret;

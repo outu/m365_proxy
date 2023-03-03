@@ -33,6 +33,7 @@ public class M365_common_rpc_message_define {
      * Microsoft365 submodule Rpc optype: Common/Exchange/sharepoint...
      */
     public enum M365RpcOpType {
+        M365_RPC_OP_TYPE_UNKNOWN(0),
         M365_RPC_OP_TYPE_COMMON(1),       // common rpc operation type
         M365_RPC_OP_TYPE_EXCH(2);         // Exchange Online&Exchange Server rpc operation type
 

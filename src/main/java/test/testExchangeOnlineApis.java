@@ -20,8 +20,9 @@ public class testExchangeOnlineApis {
 
         String mailbox = "yunqi@s22fb.onmicrosoft.com";
         initClient(mailbox);
-        ContactRequests contactRequests = new ContactRequests(ewsClient);
-        contactRequests.getContactGroup();
+        System.out.println(getAllTypeRootFolder());
+//        ContactRequests contactRequests = new ContactRequests(ewsClient);
+//        contactRequests.getContactGroup();
         //System.out.printf("%s", syncGetMessageInfo("AQMkAGI1ZmRjZWUAZC0yZTVlLTQyMzctYTc4Ni0yYjE3NDMxMjdhOGYALgAAAy5x2W1SrcBDvroL1Asx4J8BAKuvciembiNLk9i11WPD-4EAAAIBDAAAAA==","yunqi@s22fb.onmicrosoft.com","",""));
     }
 

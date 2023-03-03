@@ -19,7 +19,6 @@ import common.TypeConversion;
 import m365_proxy.M365_proxy_global_vals;
 import m365_proxy.M365_proxy_rpc_server;
 import m365_proxy.m365_proxy_operation.Exch_operation;
-import m365_proxy.m365_proxy_operation.M365_common_operation;
 import m365_proxy.m365_rpc_message.*;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import okhttp3.Request;
@@ -30,6 +29,10 @@ import java.io.BufferedReader;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import static m365_proxy.M365_proxy_error.BdErrorCode.BD_GENERIC_ERROR;
+import static m365_proxy.M365_proxy_error.BdErrorCode.BD_GENERIC_SUCCESS;
+import static m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PUBLIC;
+
 public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
     public static final Logger logger = LoggerFactory.getLogger(Exch_rpc_server_handler.class);
     /**
@@ -39,8 +42,8 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    public boolean handleRpcExchPacket(int exchRpcCode, ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    public int handleRpcExchPacket(int exchRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();;
         Exch_rpc_message_define.ExchRpcOpType exchRpcOpType = getExchRpcOpType(exchRpcCode);
 
         switch (exchRpcOpType){
@@ -90,9 +93,10 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleRpcExchMailPacket(int mailRpcCode, ByteBuffer byteBuffer, long length){
+    private int handleRpcExchMailPacket(int mailRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         logger.debug("handle private->m365 common-> mail packet....");
-        return true;
+        return ret;
     }
 
     /**
@@ -102,9 +106,10 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleRpcExchAppointmentPacket(int appointmentRpcCode, ByteBuffer byteBuffer, long length){
+    private int handleRpcExchAppointmentPacket(int appointmentRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         logger.debug("handle private->m365 exch-> appointment packet....");
-        return true;
+        return ret;
     }
 
     /**
@@ -114,9 +119,10 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleRpcExchContactPacket(int contactRpcCode, ByteBuffer byteBuffer, long length){
+    private int handleRpcExchContactPacket(int contactRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         logger.debug("handle private->m365 exch-> contact packet....");
-        return true;
+        return ret;
     }
 
     /**
@@ -126,9 +132,10 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleRpcExchTaskPacket(int taskRpcCode, ByteBuffer byteBuffer, long length){
+    private int handleRpcExchTaskPacket(int taskRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         logger.debug("handle private->m365 exch-> task packet....");
-        return true;
+        return ret;
     }
 
     /**
@@ -138,8 +145,8 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleRpcExchCommonPacket(int exchCommonRpcCode, ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    private int handleRpcExchCommonPacket(int exchCommonRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         switch (Exch_rpc_message_define.ExchRpcOpcode.getOpCodeEnum(exchCommonRpcCode)){
             case EXCH_RPC_OPCODE_DETECT_ENV:
@@ -155,7 +162,8 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
                 ret = handleGetRootFolder();
                 break;
             default:
-                ret = false;
+                ret = BD_GENERIC_ERROR.getCode();
+                ret = sendAskHeader(BD_RPC_OP_TYPE_PUBLIC.getCode(), exchCommonRpcCode, ret);
                 logger.warn("unknown M365 exch rpc opcode.");
                 break;
         }
@@ -163,8 +171,8 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
         return ret;
     }
 
-    private boolean handleDetectEnv(ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    private int handleDetectEnv(ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         try {
             String jsonString = TypeConversion.byteBufferToString(byteBuffer);
@@ -173,19 +181,21 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
             Exch_operation exchOp = new Exch_operation();
             String detectEnvAskInfo = exchOp.detectEnv(message);
             byte[] askInfo = TypeConversion.stringToBytes(detectEnvAskInfo);
-            buildAndSendAskMsg(M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo);
-
+            ret = buildAndSendAskMsg(M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo, 0);
         } catch (Exception e){
             logger.error("handle detect m365 env failed: " + e.getMessage());
-            //send error
-            ret = false;
+            ret = sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_DETECT_ENV.getOpCode(), ret);
+            //force set error
+            if (BD_GENERIC_SUCCESS.getCode() == ret){
+                ret = BD_GENERIC_ERROR.getCode();
+            }
         }
 
         return ret;
     }
 
-    private boolean handleServiceConnectUser(ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    private int handleServiceConnectUser(ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         String mail = "";
 
         try {
@@ -196,18 +206,21 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
             _exchDataCache = exchOp.exchSerConnUser(message);
             addGlobalCache(message.thread_uuid);
 
-            sendAskMsg(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_SERVICE_CONNECT_USER.getOpCode(), 0);
+            ret = sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_SERVICE_CONNECT_USER.getOpCode(), 0);
         } catch (Exception e){
             logger.error("handle Exchange Server connect user: " + mail +  " failed: " + e.getMessage());
-            sendAskMsg(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_SERVICE_CONNECT_USER.getOpCode(), 1);
-            ret = false;
+            sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_SERVICE_CONNECT_USER.getOpCode(), ret);
+            //force set error
+            if (BD_GENERIC_SUCCESS.getCode() == ret){
+                ret = BD_GENERIC_ERROR.getCode();
+            }
         }
 
         return ret;
     }
 
-    private boolean handleOnlineConnectUser(ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    private int handleOnlineConnectUser(ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
         String mail = "";
 
         try {
@@ -218,18 +231,21 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
             _exchDataCache = exchOp.exchOnConnUser(message);
             addGlobalCache(message.thread_uuid);
 
-            sendAskMsg(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_ONLINE_CONNECT_USER.getOpCode(), 0);
+            ret = sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_ONLINE_CONNECT_USER.getOpCode(), 0);
         } catch (Exception e){
             logger.error("handle Exchange Online connect user: " + mail +  " failed: " + e.getMessage());
-            sendAskMsg(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_ONLINE_CONNECT_USER.getOpCode(), 1);
-            ret = false;
+            sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_ONLINE_CONNECT_USER.getOpCode(), ret);
+            //force set error
+            if (BD_GENERIC_SUCCESS.getCode() == ret){
+                ret = BD_GENERIC_ERROR.getCode();
+            }
         }
 
         return ret;
     }
 
-    private boolean handleGetRootFolder(){
-        boolean ret = true;
+    private int handleGetRootFolder(){
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         try {
             String userRootFolder = "";
@@ -240,11 +256,14 @@ public class Exch_rpc_server_handler extends M365_proxy_rpc_server {
                 userRootFolder = exchOp.getRootFolder(_exchDataCache._ewsClient);
             }
             byte[] askInfo = TypeConversion.stringToBytes(userRootFolder);
-            buildAndSendAskMsg(Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_GET_ROOT_FOLDER.getOpCode(), askInfo);
+            ret = buildAndSendAskMsg(Exch_rpc_message_define.ExchRpcOpcode.EXCH_RPC_OPCODE_GET_ROOT_FOLDER.getOpCode(), askInfo, 0);
         } catch (Exception e){
             logger.error("handle get user: " + _exchDataCache._mail + " root folder failed: " + e.getMessage());
-            sendAskMsg(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), 1);
-            ret = false;
+            sendAskHeader(Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), 1);
+            //force set error
+            if (BD_GENERIC_SUCCESS.getCode() == ret){
+                ret = BD_GENERIC_ERROR.getCode();
+            }
         }
 
         return ret;

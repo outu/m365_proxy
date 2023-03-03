@@ -20,22 +20,23 @@ public class testExchangeServerApis {
     public static void main(String[] args) throws Exception {
         String mailbox = "Administrator@exch.com.cn";
         initClient(mailbox);
-        int size,nextSize= 0;
-        int num = getMimeContentInfo("AAMkAGE5NzcxZjBiLWI0Y2MtNDhlNy1hZjViLTQ0NzZiMmQzN2Q1ZABGAAAAAACC2Y8PhSFoQo3NQPbM2L49BwBcaT0SLAv6S6PqbrxnTa5XAAAAAAEMAABcaT0SLAv6S6PqbrxnTa5XAABu5XMDAAA=");
-        System.out.printf(String.valueOf(num));
-        if (num > 1024){
-            size = 1024;
-            nextSize = num - 1024;
-        } else {
-            size = num;
-        }
-        byte[] read = new byte[size];
-        ByteArrayInputStream in = new ByteArrayInputStream(mimecontentCache);
-        in.read(read);
-        System.out.printf(new String(read));
-        byte[] read1 = new byte[nextSize];
-        in.read(read1);
-        System.out.printf(new String(read1));
+        System.out.println(getAllTypeRootFolder());
+//        int size,nextSize= 0;
+//        int num = getMimeContentInfo("AAMkAGE5NzcxZjBiLWI0Y2MtNDhlNy1hZjViLTQ0NzZiMmQzN2Q1ZABGAAAAAACC2Y8PhSFoQo3NQPbM2L49BwBcaT0SLAv6S6PqbrxnTa5XAAAAAAEMAABcaT0SLAv6S6PqbrxnTa5XAABu5XMDAAA=");
+//        System.out.printf(String.valueOf(num));
+//        if (num > 1024){
+//            size = 1024;
+//            nextSize = num - 1024;
+//        } else {
+//            size = num;
+//        }
+//        byte[] read = new byte[size];
+//        ByteArrayInputStream in = new ByteArrayInputStream(mimecontentCache);
+//        in.read(read);
+//        System.out.printf(new String(read));
+//        byte[] read1 = new byte[nextSize];
+//        in.read(read1);
+//        System.out.printf(new String(read1));
     }
 
 

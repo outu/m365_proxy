@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
+import static m365_proxy.M365_proxy_error.BdErrorCode.*;
+
 
 public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSocketChannel, M365_proxy_listen_connection> {
     public static final Logger logger = LoggerFactory.getLogger(M365_proxy_work_thread.class);
@@ -37,19 +39,22 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
      */
     @Override
     public void completed(AsynchronousSocketChannel socketChannel, M365_proxy_listen_connection attachment) {
+        int ret = BD_GENERIC_SUCCESS.getCode();
         try {
             //start the next listen
             attachment.getServerChannel().accept(attachment, new M365_proxy_work_thread());
 
             logger.debug("accept one connection: " + socketChannel.getRemoteAddress());
 
-            addMapThreadUuidToThreadObj(attachment);
-            logger.debug("add thread: " + _threadUuid + " to map thread obj");
+            ret = addMapThreadUuidToThreadObj(attachment);
 
-            _clientChannel = socketChannel;
-            M365_proxy_rpc_server rpcServer = new M365_proxy_rpc_server();
-            rpcServer.init(socketChannel, attachment);
-            rpcServer.waitAndHandleRequest();
+            if (BD_GENERIC_SUCCESS.getCode() == ret){
+                logger.debug("add thread: " + _threadUuid + " to map thread obj");
+                _clientChannel = socketChannel;
+                M365_proxy_rpc_server rpcServer = new M365_proxy_rpc_server();
+                rpcServer.init(socketChannel, attachment);
+                rpcServer.waitAndHandleRequest();
+            }
 
             destroy(attachment);
             logger.debug("connection closed, thread: " + _threadUuid + " exit");
@@ -79,9 +84,18 @@ public class M365_proxy_work_thread implements CompletionHandler<AsynchronousSoc
      * @Description Store the thread object in the shared map according to the thread uuid
      * @param attachment M365_proxy_listen_connection shared class
      */
-    private synchronized void addMapThreadUuidToThreadObj(M365_proxy_listen_connection attachment){
-        _threadUuid = getThreadUuid();
-        attachment._workThreadManager.put(_threadUuid, Thread.currentThread());
+    private synchronized int addMapThreadUuidToThreadObj(M365_proxy_listen_connection attachment){
+        int ret = BD_GENERIC_SUCCESS.getCode();
+
+        try {
+            _threadUuid = getThreadUuid();
+            attachment._workThreadManager.put(_threadUuid, Thread.currentThread());
+        } catch (Exception e){
+            logger.error("add thread: " + _threadUuid + "to work thread manager error: " + e.getMessage());
+            ret = BD_GENERIC_ERROR.getCode();
+        }
+
+        return ret;
     }
 
     /**

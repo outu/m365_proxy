@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static m365_proxy.M365_proxy_error.BdErrorCode.BD_GENERIC_SUCCESS;
+
 public class M365_proxy_application {
 
     String _app_name = "M365_proxy";
@@ -30,14 +32,16 @@ public class M365_proxy_application {
 
     public String _process_uuid;
 
-    public Boolean main(String[] args) throws IOException {
-        boolean ret = true;
-
+    public boolean main(String[] args) {
         M365_proxy_listen_connection m365_proxy_listen_connection = new M365_proxy_listen_connection();
         m365_proxy_listen_connection.init(_listen_port, _process_uuid, _thread_pool_num);
-        ret = m365_proxy_listen_connection.run();
+        int ret = m365_proxy_listen_connection.run();
 
-        return ret;
+        if (BD_GENERIC_SUCCESS.getCode() != ret){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**

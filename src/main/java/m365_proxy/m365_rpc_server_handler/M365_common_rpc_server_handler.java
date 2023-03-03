@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
+import static m365_proxy.M365_proxy_error.BdErrorCode.BD_GENERIC_ERROR;
+import static m365_proxy.M365_proxy_error.BdErrorCode.BD_GENERIC_SUCCESS;
+import static m365_proxy.M365_proxy_error.M365ErrorCode.M365_RPC_MSG_ERROR;
+import static m365_proxy.m365_rpc_message.Bd_rpc_message_define.BdRpcOpType.BD_RPC_OP_TYPE_PUBLIC;
+
 public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
     public static final Logger logger = LoggerFactory.getLogger(M365_common_rpc_server_handler.class);
     /**
@@ -32,8 +37,8 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    public boolean handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    public int handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         switch (M365_common_rpc_message_define.M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode)){
             case M365_COMMON_RPC_OPCODE_DETECT_ENV:
@@ -49,7 +54,8 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
                // ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
                 break;
             default:
-                ret = false;
+                ret = M365_RPC_MSG_ERROR.getCode();
+                ret = sendAskHeader(BD_RPC_OP_TYPE_PUBLIC.getCode(), m365CommonRpcCode, ret);
                 logger.warn("unknown M365 common rpc opcode.");
                 break;
         }
@@ -63,8 +69,8 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
      * @param length
      * @return
      */
-    private boolean handleDetectM365Env(ByteBuffer byteBuffer, long length){
-        boolean ret = true;
+    private int handleDetectM365Env(ByteBuffer byteBuffer, long length){
+        int ret = BD_GENERIC_SUCCESS.getCode();
 
         try {
             String jsonString = TypeConversion.byteBufferToString(byteBuffer);
@@ -73,11 +79,11 @@ public class M365_common_rpc_server_handler extends M365_proxy_rpc_server {
             M365_common_operation m365CommonOp = new M365_common_operation();
             String detectM365EnvAskInfo = m365CommonOp.detectM365Env(message);
             byte[] askInfo = TypeConversion.stringToBytes(detectM365EnvAskInfo);
-            buildAndSendAskMsg(M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo);
+            buildAndSendAskMsg(M365_common_rpc_message_define.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), askInfo, 0);
         } catch (Exception e){
             logger.error("handle detect m365 env failed: " + e.getMessage());
             //send error
-            ret = false;
+            ret = BD_GENERIC_ERROR.getCode();
         }
 
         return ret;
