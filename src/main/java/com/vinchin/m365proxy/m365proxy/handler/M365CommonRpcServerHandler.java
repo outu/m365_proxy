@@ -42,7 +42,8 @@ public class M365CommonRpcServerHandler extends M365ProxyRpcServer {
     public int handleRpcM365CommonPacket(int m365CommonRpcCode, ByteBuffer byteBuffer, long length){
         int ret = BD_GENERIC_SUCCESS.getCode();
 
-        switch (M365CommonRpcMessageDefine.M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode)){
+        M365CommonRpcMessageDefine.M365CommonRpcOpcode m365CommonRpcOpcode= M365CommonRpcMessageDefine.M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode);
+        switch (m365CommonRpcOpcode){
             case M365_COMMON_RPC_OPCODE_DETECT_ENV:
                 ret = handleDetectM365Env(byteBuffer, length);
                 break;

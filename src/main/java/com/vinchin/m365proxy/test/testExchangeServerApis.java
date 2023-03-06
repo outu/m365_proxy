@@ -1,8 +1,8 @@
 package com.vinchin.m365proxy.test;
 
-import apis.ews.FolderRequests;
-import apis.ews.MessageRequests;
-import apis.powershell.PowershellExchangeOperation;
+import com.vinchin.m365proxy.apis.ews.FolderRequests;
+import com.vinchin.m365proxy.apis.ews.MessageRequests;
+import com.vinchin.m365proxy.apis.powershell.PowershellExchangeOperation;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 
 import java.io.ByteArrayInputStream;

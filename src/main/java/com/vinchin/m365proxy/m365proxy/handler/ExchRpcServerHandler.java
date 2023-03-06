@@ -47,7 +47,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
      * @return
      */
     public int handleRpcExchPacket(int exchRpcCode, ByteBuffer byteBuffer, long length){
-        int ret = BD_GENERIC_SUCCESS.getCode();;
+        int ret = BD_GENERIC_SUCCESS.getCode();
         ExchRpcMessageDefine.ExchRpcOpType exchRpcOpType = getExchRpcOpType(exchRpcCode);
 
         switch (exchRpcOpType){
@@ -151,8 +151,9 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
      */
     private int handleRpcExchCommonPacket(int exchCommonRpcCode, ByteBuffer byteBuffer, long length){
         int ret = BD_GENERIC_SUCCESS.getCode();
+        ExchRpcMessageDefine.ExchRpcOpcode exchRpcOpcode = ExchRpcMessageDefine.ExchRpcOpcode.getOpCodeEnum(exchCommonRpcCode);
 
-        switch (ExchRpcMessageDefine.ExchRpcOpcode.getOpCodeEnum(exchCommonRpcCode)){
+        switch (exchRpcOpcode){
             case EXCH_RPC_OPCODE_DETECT_ENV:
                 ret = handleDetectEnv(byteBuffer, length);
                 break;
@@ -166,9 +167,11 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
                 ret = handleGetRootFolder();
                 break;
             default:
+                //Because the number of opcode has been limited previously, it is impossible to have an unknown number,
+                //so default can never be executed here
+                logger.warn("unknown M365 exch rpc opcode.");
                 ret = BD_GENERIC_ERROR.getCode();
                 ret = sendAskHeader(BD_RPC_OP_TYPE_PUBLIC.getCode(), exchCommonRpcCode, ret);
-                logger.warn("unknown M365 exch rpc opcode.");
                 break;
         }
 

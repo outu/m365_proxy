@@ -37,19 +37,12 @@ public class M365ProxyListenConnection {
      * public values is shared by socket work thread in attachment
      */
     public int _listenPort;
-
     public String _processUuid;
-
     public boolean _stop = false;
-
-    public volatile Map<String, Thread> _workThreadManager = new HashMap<>();
-
+    public Map<String, Thread> _workThreadManager = new HashMap<>();
     private int _threadPoolNum;
-
     private ExecutorService _executorService;
-
     private AsynchronousServerSocketChannel _serverChannel;
-
     private AsynchronousChannelGroup _channelGroup;
 
     /**

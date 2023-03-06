@@ -39,7 +39,7 @@ public class ExchRpcMessageDefine {
                 }
             }
 
-            return null;
+            return EXCH_RPC_OP_TYPE_COMMON;
         }
     }
 
@@ -60,7 +60,7 @@ public class ExchRpcMessageDefine {
         EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_EWS(254),
         EXCH_RPC_OPCODE_GET_MAIL_INFO_BY_EWS(255),
         EXCH_RPC_OPCODE_GET_MAIL_MIMECONTENT_BY_EWS(256),
-        EXCH_RPC_OPCODE_GET_MAIL_XML_DATA_BY_SOAP(257);
+        EXCH_RPC_OPCODE_GET_MAIL_XML_DATA_BY_SOAP(257),
         /******************************************* event type: 301~350 *****************************************/
 
 
@@ -68,6 +68,10 @@ public class ExchRpcMessageDefine {
 
 
         /******************************************* task type: 401~450 *****************************************/
+
+
+        /******************************************* unknown type: 451~500 *****************************************/
+        EXCH_RPC_OPCODE_UNKNOWN(451);
 
         private int opCode = 0;
 
@@ -86,7 +90,7 @@ public class ExchRpcMessageDefine {
                 }
             }
 
-            return null;
+            return EXCH_RPC_OPCODE_UNKNOWN;
         }
     }
 

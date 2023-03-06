@@ -1,13 +1,13 @@
 package com.vinchin.m365proxy.test;
 
-import apis.ews.EwsBaseRequest;
-import apis.ews.MessageRequests;
-import apis.graph.GraphBaseRequest;
-import apis.graph.common.UserRequests;
-import apis.powershell.PowershellExchangeOperation;
-import apis.soap.SoapBaseRequest;
-import apis.soap.XmlRequestData;
 import com.microsoft.graph.requests.GraphServiceClient;
+import com.vinchin.m365proxy.apis.ews.EwsBaseRequest;
+import com.vinchin.m365proxy.apis.ews.MessageRequests;
+import com.vinchin.m365proxy.apis.graph.GraphBaseRequest;
+import com.vinchin.m365proxy.apis.graph.common.UserRequests;
+import com.vinchin.m365proxy.apis.powershell.PowershellExchangeOperation;
+import com.vinchin.m365proxy.apis.soap.SoapBaseRequest;
+import com.vinchin.m365proxy.apis.soap.XmlRequestData;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import okhttp3.Request;
 import org.apache.http.HttpEntity;
@@ -133,7 +133,7 @@ public class testOuth {
         soapClientCache.add(soapClientMap);
         soapClientCache.add(httpContextMap);
 
-        apis.soap.MailRequests mailRequests = new apis.soap.MailRequests(soapClientCache);
+        com.vinchin.m365proxy.apis.soap.MailRequests mailRequests = new com.vinchin.m365proxy.apis.soap.MailRequests(soapClientCache);
         XmlRequestData xmlRequestData = new XmlRequestData();
         String xmlToGetMailMessage = xmlRequestData.buildXmlToGetMailMimeContent("administrator@exch.com.cn", "AAMkAGE5NzcxZjBiLWI0Y2MtNDhlNy1hZjViLTQ0NzZiMmQzN2Q1ZABGAAAAAACC2Y8PhSFoQo3NQPbM2L49BwBcaT0SLAv6S6PqbrxnTa5XAAAAAAEMAABcaT0SLAv6S6PqbrxnTa5XAACKj7hrAAA=");
 

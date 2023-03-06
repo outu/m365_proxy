@@ -36,7 +36,7 @@ public class BdRpcMessageDefine {
                 }
             }
 
-            return null;
+            return BD_RPC_OP_TYPE_UNKNOWN;
         }
     }
 

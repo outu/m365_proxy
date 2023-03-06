@@ -1,9 +1,9 @@
 package com.vinchin.m365proxy.test;
 
-import apis.ews.FolderRequests;
-import apis.graph.common.UserRequests;
-import apis.graph.exchange.MessageRequests;
 import com.microsoft.graph.requests.GraphServiceClient;
+import com.vinchin.m365proxy.apis.ews.FolderRequests;
+import com.vinchin.m365proxy.apis.graph.common.UserRequests;
+import com.vinchin.m365proxy.apis.graph.exchange.MessageRequests;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import okhttp3.Request;
 

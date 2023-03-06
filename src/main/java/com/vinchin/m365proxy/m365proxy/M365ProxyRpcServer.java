@@ -30,6 +30,7 @@ import com.vinchin.m365proxy.m365proxy.message.M365CommonRpcMessageDefine;
 import static com.vinchin.m365proxy.m365proxy.M365ProxyError.BdErrorCode.*;
 import static com.vinchin.m365proxy.m365proxy.M365ProxyError.M365ErrorCode.M365_RPC_MSG_ERROR;
 import static com.vinchin.m365proxy.m365proxy.message.BdRpcMessageDefine.BdRpcOpType.BD_RPC_OP_TYPE_PUBLIC;
+import static com.vinchin.m365proxy.m365proxy.message.BdRpcMessageDefine.BdRpcOpType.BD_RPC_OP_TYPE_UNKNOWN;
 import static com.vinchin.m365proxy.m365proxy.message.M365CommonRpcMessageDefine.M365_DEFAULT_RPC_TIMEOUT;
 
 public class M365ProxyRpcServer {
@@ -93,8 +94,9 @@ public class M365ProxyRpcServer {
                     break;
                 }
             }
+            BdRpcMessageDefine.BdRpcOpType bdRpcOpType = BdRpcMessageDefine.BdRpcOpType.getOpTypeEnum(rpcHeader.op_type);
 
-            switch (BdRpcMessageDefine.BdRpcOpType.getOpTypeEnum(rpcHeader.op_type)){
+            switch (bdRpcOpType){
                 case BD_RPC_OP_TYPE_PUBLIC:
                     ret = handleRpcPublicPacket((int)rpcHeader.opcode, recvByteBuffer, rpcHeader.body_len);
                     break;
@@ -103,11 +105,8 @@ public class M365ProxyRpcServer {
                     break;
                 default:
                     logger.error("unknown rpc optype.");
+                    ret = BD_RPC_MSG_ERROR.getCode();
                     ret = sendAskHeader(BD_RPC_OP_TYPE_PUBLIC.getCode(), (int)rpcHeader.opcode, ret);
-                    //force set error
-                    if (BD_GENERIC_SUCCESS.getCode() == ret){
-                        ret = BD_RPC_MSG_ERROR.getCode();
-                    }
                     break;
             }
 
@@ -157,8 +156,8 @@ public class M365ProxyRpcServer {
                 exchRpcHandler.destroy();
                 break;
             default:
-                ret = M365_RPC_MSG_ERROR.getCode();
                 logger.error("unknown M365 rpc optype.");
+                ret = M365_RPC_MSG_ERROR.getCode();
                 ret = sendAskHeader(BD_RPC_OP_TYPE_PUBLIC.getCode(), privateRpcOpcode, ret);
                 break;
         }
@@ -224,7 +223,7 @@ public class M365ProxyRpcServer {
         try{
             int sendLength = _clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
             if (sendLength != needSendLength){
-                ret = BD_NET_SEND_DATA_ERROR.getCode();
+                ret = BD_RPC_NETWORK_ERROR.getCode();
             }
         } catch (ExecutionException e){
             ret = BD_GENERIC_ERROR.getCode();
@@ -319,7 +318,7 @@ public class M365ProxyRpcServer {
     }
 
     private BdRpcMessageDefine.BdCommonRpcMessageHeader parseBdCommonRpcMessageHeader(ByteBuffer byteBuffer){
-        BdRpcMessageDefine.BdCommonRpcMessageHeader bdCommonRpcMessageHeader;
+        BdRpcMessageDefine.BdCommonRpcMessageHeader bdCommonRpcMessageHeader= new BdRpcMessageDefine.BdCommonRpcMessageHeader();
 
         try{
             byte[] op_type       = new byte[2];
@@ -332,7 +331,6 @@ public class M365ProxyRpcServer {
             System.arraycopy(byteBuffer.array(), 4, opcode, 0, opcode.length);
             System.arraycopy(byteBuffer.array(), 8, body_len, 0, body_len.length);
 
-            bdCommonRpcMessageHeader = new BdRpcMessageDefine.BdCommonRpcMessageHeader();
             bdCommonRpcMessageHeader.op_type = TypeConversion.bytesToInt(op_type);
             bdCommonRpcMessageHeader.need_response = TypeConversion.bytesToInt(need_response);
             bdCommonRpcMessageHeader.opcode = TypeConversion.bytesToLong(opcode);

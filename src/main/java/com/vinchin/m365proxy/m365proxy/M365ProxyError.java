@@ -14,7 +14,7 @@
 package com.vinchin.m365proxy.m365proxy;
 
 public class M365ProxyError {
-    public static enum BdErrorCode{
+    public enum BdErrorCode{
         BD_GENERIC_SUCCESS(0),                                                             //generic success
         BD_GENERIC_ERROR(1),                                                               //generic error
         BD_NOT_INIT_ERROR(2),
@@ -71,7 +71,7 @@ public class M365ProxyError {
 
         private int errorCode = 0;
 
-        private M365ErrorCode(int value) {
+        M365ErrorCode(int value) {
             errorCode = value;
         }
 

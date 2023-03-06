@@ -63,10 +63,11 @@ public class M365CommonRpcMessageDefine {
      * number : 100~200
      */
     public static enum M365CommonRpcOpcode{
-        M365_COMMON_RPC_OPCODE_DETECT_ENV(100),
-        M365_COMMON_RPC_OPCODE_GET_USER_LIST(101),
-        M365_COMMON_RPC_OPCODE_GET_GROUP_LIST(102),
-        M365_COMMON_RPC_IS_USER_EXISTS(103);
+        M365_COMMON_RPC_OPCODE_UNKNOWN(100),
+        M365_COMMON_RPC_OPCODE_DETECT_ENV(101),
+        M365_COMMON_RPC_OPCODE_GET_USER_LIST(102),
+        M365_COMMON_RPC_OPCODE_GET_GROUP_LIST(103),
+        M365_COMMON_RPC_IS_USER_EXISTS(104);
 
         private int opCode = 0;
 
@@ -85,7 +86,7 @@ public class M365CommonRpcMessageDefine {
                 }
             }
 
-            return null;
+            return M365_COMMON_RPC_OPCODE_UNKNOWN;
         }
     }
 
