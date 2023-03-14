@@ -25,9 +25,9 @@ import java.util.Objects;
 
 public class FolderRequests extends SoapBaseRequest {
 
-    public FolderRequests(List<Map> soapClientList) {
-        soapClient = (HttpPost) soapClientList.get(0).get("soapClient");
-        httpContext = (HttpClientContext) soapClientList.get(1).get("httpContext");
+    public FolderRequests(HttpPost httpPost, HttpClientContext httpClientContext) {
+        soapHttpClient = httpPost;
+        httpContext = httpClientContext;
     }
 
     public JSONObject getFolder(String xml){

@@ -22,27 +22,18 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 public class testOuth {
-    public List<Map>getExchangeServerSoapClient(String mailbox){
+    public  SoapBaseRequest getExchangeServerSoapClient(String mailbox){
         Map<String, String> organizationAuthParameters = new HashMap<String, String>();
         organizationAuthParameters.put("username", "Administrator@exch.com.cn");
-        organizationAuthParameters.put("password", "backup@1234567890");
+        organizationAuthParameters.put("password", "backup@123456789");
         organizationAuthParameters.put("domain", "WIN-TT7P7PN7QHJ.exch.com.cn");
         organizationAuthParameters.put("region", "100");
 
         SoapBaseRequest soapBaseRequest = new SoapBaseRequest(organizationAuthParameters);
-        soapBaseRequest.setSoapClient(mailbox);
+        soapBaseRequest.setSoapHttpClient(mailbox);
         soapBaseRequest.setHttpContext();
 
-        Map<String, HttpPost> soapClientMap = new HashMap<>();
-        soapClientMap.put("soapClient", soapBaseRequest.getSoapClient());
-        Map<String, HttpClientContext> httpContextMap = new HashMap<>();
-        httpContextMap.put("httpContext", soapBaseRequest.getHttpContext());
-
-        List<Map> soapClient = new ArrayList<>();
-        soapClient.add(soapClientMap);
-        soapClient.add(httpContextMap);
-
-        return soapClient;
+        return soapBaseRequest;
     }
 
 
@@ -67,7 +58,7 @@ public class testOuth {
     public ExchangeService getExchangeServerEwsClient(String mailbox){
         Map<String, String> organizationAuthParameters = new HashMap<String, String>();
         organizationAuthParameters.put("username", "Administrator@exch.com.cn");
-        organizationAuthParameters.put("password", "backup@1234567890");
+        organizationAuthParameters.put("password", "backup@123456789");
         organizationAuthParameters.put("domain", "WIN-TT7P7PN7QHJ.exch.com.cn");
         organizationAuthParameters.put("region", "100");
 
@@ -121,53 +112,35 @@ public class testOuth {
         organizationAuthParameters.put("region", "100");
 
         SoapBaseRequest soapBaseRequest = new SoapBaseRequest(organizationAuthParameters);
-        soapBaseRequest.setSoapClient("Administrator@exch.com.cn");
+        soapBaseRequest.setSoapHttpClient("Administrator@exch.com.cn");
         soapBaseRequest.setHttpContext();
 
-        Map<String, HttpPost> soapClientMap = new HashMap<>();
-        soapClientMap.put("soapClient", soapBaseRequest.getSoapClient());
-        Map<String, HttpClientContext> httpContextMap = new HashMap<>();
-        httpContextMap.put("httpContext", soapBaseRequest.getHttpContext());
-
-        List<Map> soapClientCache = new ArrayList<>();
-        soapClientCache.add(soapClientMap);
-        soapClientCache.add(httpContextMap);
-
-        com.vinchin.m365proxy.apis.soap.MailRequests mailRequests = new com.vinchin.m365proxy.apis.soap.MailRequests(soapClientCache);
+        com.vinchin.m365proxy.apis.soap.MailRequests mailRequests = new com.vinchin.m365proxy.apis.soap.MailRequests(soapBaseRequest.getSoapHttpClient(), soapBaseRequest.getHttpContext());
         XmlRequestData xmlRequestData = new XmlRequestData();
         String xmlToGetMailMessage = xmlRequestData.buildXmlToGetMailMimeContent("administrator@exch.com.cn", "AAMkAGE5NzcxZjBiLWI0Y2MtNDhlNy1hZjViLTQ0NzZiMmQzN2Q1ZABGAAAAAACC2Y8PhSFoQo3NQPbM2L49BwBcaT0SLAv6S6PqbrxnTa5XAAAAAAEMAABcaT0SLAv6S6PqbrxnTa5XAACKj7hrAAA=");
 
 
-        HttpResponse httpResponse = mailRequests.getResponseWithMimeContent(xmlToGetMailMessage);
-        if(httpResponse.getStatusLine().getStatusCode() == 200){
-            HttpEntity entity1 = httpResponse.getEntity();
-
-            char[] readbuffer = new char[1024];
-
-            BufferedReader xmlStreamReaderCache = new BufferedReader(new InputStreamReader(entity1.getContent()));
-            int count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
-            File txt = new File("F:\\soap_big2.xml");
-            if(!txt.exists()){
-                boolean result = txt.createNewFile();
-            }
-            FileOutputStream fos = new FileOutputStream(txt);
-            while (count > 0) {
-                String tmpString = String.copyValueOf(readbuffer);
-                char[] tmpChar = new char[count];
-                tmpString.getChars(0, count, tmpChar, 0);
-                byte[] byteData = toBytes(tmpChar);
-                fos.write(byteData, 0, byteData.length);
-                fos.flush();
-                count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
-            }
-            fos.close();
-        } else {
-            //System.out.println("error");
+        char[] readbuffer = new char[1024];
+        BufferedReader xmlStreamReaderCache = mailRequests.getResponseWithMimeContent(xmlToGetMailMessage);
+        int count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
+        File txt = new File("F:\\soap_big2.xml");
+        if(!txt.exists()){
+            boolean result = txt.createNewFile();
         }
+        FileOutputStream fos = new FileOutputStream(txt);
+        while (count > 0) {
+            String tmpString = String.copyValueOf(readbuffer);
+            char[] tmpChar = new char[count];
+            tmpString.getChars(0, count, tmpChar, 0);
+            byte[] byteData = toBytes(tmpChar);
+            fos.write(byteData, 0, byteData.length);
+            fos.flush();
+            count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
+        }
+        fos.close();
 
 
-
-        System.out.println(httpResponse.getStatusLine().getProtocolVersion() + " " + httpResponse.getStatusLine().getStatusCode());
+       // System.out.println(httpResponse.getStatusLine().getProtocolVersion() + " " + httpResponse.getStatusLine().getStatusCode());
         return ret;
     }
 

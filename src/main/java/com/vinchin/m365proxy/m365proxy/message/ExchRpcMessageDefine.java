@@ -17,7 +17,7 @@ public class ExchRpcMessageDefine {
 
     public enum ExchRpcOpType {
         EXCH_RPC_OP_TYPE_COMMON(0),
-        EXCH_RPC_OP_TYPE_MAIL(1),                // mail rpc operation type
+        EXCH_RPC_OP_TYPEmail(1),                // mail rpc operation type
         EXCH_RPC_OP_TYPE_APPOINTMENT(2),         // appointment rpc operation type
         EXCH_RPC_OP_TYPE_CONTACT(3),             // contact rpc operation type
         EXCH_RPC_OP_TYPE_TASK(4);                // task rpc operation type
@@ -54,13 +54,13 @@ public class ExchRpcMessageDefine {
         EXCH_RPC_OPCODE_ONLINE_CONNECT_USER(202),
         EXCH_RPC_OPCODE_GET_ROOT_FOLDER(203),
         /******************************************* mail type: 251~300 *****************************************/
-        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_GRAPH(251),
-        EXCH_RPC_OPCODE_GET_MAIL_CHILD_FOLDER_BY_EWS(252),
-        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_GRAPH(253),
-        EXCH_RPC_OPCODE_GET_MAIL_LIST_BY_EWS(254),
-        EXCH_RPC_OPCODE_GET_MAIL_INFO_BY_EWS(255),
-        EXCH_RPC_OPCODE_GET_MAIL_MIMECONTENT_BY_EWS(256),
-        EXCH_RPC_OPCODE_GET_MAIL_XML_DATA_BY_SOAP(257),
+        EXCH_RPC_OPCODE_GETmail_CHILD_FOLDER_BY_GRAPH(251),
+        EXCH_RPC_OPCODE_GETmail_CHILD_FOLDER_BY_EWS(252),
+        EXCH_RPC_OPCODE_GETmail_LIST_BY_GRAPH(253),
+        EXCH_RPC_OPCODE_GETmail_LIST_BY_EWS(254),
+        EXCH_RPC_OPCODE_GETmail_INFO_BY_EWS(255),
+        EXCH_RPC_OPCODE_GETmail_MIMECONTENT_BY_EWS(256),
+        EXCH_RPC_OPCODE_GETmail_XML_DATA_BY_SOAP(257),
         /******************************************* event type: 301~350 *****************************************/
 
 

@@ -8,28 +8,22 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
+import java.io.BufferedReader;
 import java.util.List;
 import java.util.Map;
 
 public class MailRequests extends SoapBaseRequest {
     //private String requestMailMimeContentXml = "";
 
-    public MailRequests(List<Map> soapClientList){
-        soapClient = (HttpPost) soapClientList.get(0).get("soapClient");
-        httpContext = (HttpClientContext) soapClientList.get(1).get("httpContext");
+    public MailRequests(HttpPost httpPost, HttpClientContext httpClientContext){
+        soapHttpClient = httpPost;
+        httpContext = httpClientContext;
     }
 
 
-    public HttpResponse getResponseWithMimeContent(String xml){
-        try {
-            SSLConnectionSocketFactory connectionSocketFactory = getSSLConnectionSocketFactory();
-            StringEntity entity = new StringEntity(xml);
-            soapClient.setEntity(entity);
-            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(connectionSocketFactory).build();
+    public BufferedReader getResponseWithMimeContent(String xml){
+        boolean ret = doStreamSoapRequest(xml);
 
-            return httpClient.execute(soapClient, httpContext);
-        } catch (Exception e){
-            return null;
-        }
+        return getXmlStreamReaderCache();
     }
 }

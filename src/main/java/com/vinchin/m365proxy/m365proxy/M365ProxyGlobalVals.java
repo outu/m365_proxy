@@ -27,9 +27,9 @@ public class M365ProxyGlobalVals {
     public static Map<String, ExchConnCache> g_exch_conn_caches = new HashMap<>();
 
     public static class ExchConnCache{
-        public ExchangeService _ewsClient = null;
-        public GraphServiceClient<Request> _graphClient = null;
-        public Map<String, String> _organizationAuthParameters;
-        public String _mail = "";
+        public ExchangeService ewsClient = null;
+        public GraphServiceClient<Request> graphClient = null;
+        public Map<String, String> organizationAuthParameters;
+        public String mail = "";
     }
 }

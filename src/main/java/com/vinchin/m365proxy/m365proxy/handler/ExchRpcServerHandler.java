@@ -14,6 +14,7 @@
 package com.vinchin.m365proxy.m365proxy.handler;
 
 import com.microsoft.graph.requests.GraphServiceClient;
+import com.vinchin.m365proxy.apis.soap.SoapBaseRequest;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import okhttp3.Request;
 import org.slf4j.Logger;
@@ -24,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
-import com.vinchin.m365proxy.apis.BaseUtil;
 import com.vinchin.m365proxy.common.TypeConversion;
 import com.vinchin.m365proxy.m365proxy.M365ProxyGlobalVals;
 import com.vinchin.m365proxy.m365proxy.M365ProxyRpcServer;
@@ -52,7 +52,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
         ExchRpcMessageDefine.ExchRpcOpType exchRpcOpType = getExchRpcOpType(exchRpcCode);
 
         switch (exchRpcOpType){
-            case EXCH_RPC_OP_TYPE_MAIL:
+            case EXCH_RPC_OP_TYPEmail:
                 ret = handleRpcExchMailPacket(exchRpcCode, byteBuffer, length);
                 break;
             case EXCH_RPC_OP_TYPE_APPOINTMENT:
@@ -79,7 +79,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
      */
     private ExchRpcMessageDefine.ExchRpcOpType getExchRpcOpType(int exchOpcode){
         if (250 <= exchOpcode && exchOpcode < 300){
-            return ExchRpcMessageDefine.ExchRpcOpType.EXCH_RPC_OP_TYPE_MAIL;
+            return ExchRpcMessageDefine.ExchRpcOpType.EXCH_RPC_OP_TYPEmail;
         } else if (300 <= exchOpcode && exchOpcode < 350) {
             return ExchRpcMessageDefine.ExchRpcOpType.EXCH_RPC_OP_TYPE_APPOINTMENT;
         } else if (350 <= exchOpcode && exchOpcode < 400) {
@@ -211,7 +211,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
             ExchRpcMessageDefine.ExchSerConnUserMessage message = ExchRpcPacketHandler.toMessage.TransformServerConnUserInfo(jsonString);
             mail = message.mail;
             ExchOperation exchOp = new ExchOperation();
-            _exchDataCache = exchOp.exchSerConnUser(message);
+            exchDataCache = exchOp.exchSerConnUser(message);
             addGlobalCache(message.thread_uuid);
 
             ret = sendAskHeader(BdRpcMessageDefine.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), ExchRpcMessageDefine.ExchRpcOpcode.EXCH_RPC_OPCODE_SERVICE_CONNECT_USER.getOpCode(), 0);
@@ -236,7 +236,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
             ExchRpcMessageDefine.ExchOnConnUserMessage message = ExchRpcPacketHandler.toMessage.TransformOnlineConnUserInfo(jsonString);
             mail = message.mail;
             ExchOperation exchOp = new ExchOperation();
-            _exchDataCache = exchOp.exchOnConnUser(message);
+            exchDataCache = exchOp.exchOnConnUser(message);
             addGlobalCache(message.thread_uuid);
 
             ret = sendAskHeader(BdRpcMessageDefine.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), ExchRpcMessageDefine.ExchRpcOpcode.EXCH_RPC_OPCODE_ONLINE_CONNECT_USER.getOpCode(), 0);
@@ -258,12 +258,12 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
         try {
             String userRootFolder = "";
             ExchOperation exchOp = new ExchOperation();
-            userRootFolder = exchOp.getRootFolder(_exchDataCache._ewsClient, _exchDataCache._soapClientCache, _exchDataCache._mail);
+            userRootFolder = exchOp.getRootFolder(exchDataCache.ewsClient, exchDataCache.soapClient, exchDataCache.mail);
 
             byte[] askInfo = TypeConversion.stringToBytes(userRootFolder);
             ret = buildAndSendAskMsg(ExchRpcMessageDefine.ExchRpcOpcode.EXCH_RPC_OPCODE_GET_ROOT_FOLDER.getOpCode(), askInfo, 0);
         } catch (Exception e){
-            logger.error("handle get user: " + _exchDataCache._mail + " root folder failed: " + e.getMessage());
+            logger.error("handle get user: " + exchDataCache.mail + " root folder failed: " + e.getMessage());
             sendAskHeader(BdRpcMessageDefine.BdRpcOpType.BD_RPC_OP_TYPE_PRIVATE.getCode(), M365CommonRpcMessageDefine.M365CommonRpcOpcode.M365_COMMON_RPC_OPCODE_DETECT_ENV.getOpCode(), 1);
             //force set error
             if (BD_GENERIC_SUCCESS.getCode() == ret){
@@ -275,38 +275,37 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
     }
 
     public void destroy(){
-        _clientAttachment = null;
-        _clientChannel = null;
-        _exchDataCache = null;
+        clientAttachment = null;
+        clientChannel = null;
+        exchDataCache = null;
     }
 
     public ExchDataCache getExchDataCache(){
-        return _exchDataCache;
+        return exchDataCache;
     }
 
-    public void setExchDataCache(ExchDataCache exchDataCache){
-        _exchDataCache = exchDataCache;
+    public void setExchDataCache(ExchDataCache exchCache){
+        exchDataCache = exchCache;
     }
 
     private synchronized boolean addGlobalCache(String threadUuid){
         M365ProxyGlobalVals.ExchConnCache connCache = new M365ProxyGlobalVals.ExchConnCache();
-        connCache._organizationAuthParameters = _exchDataCache._organizationAuthParameters;
-        connCache._graphClient = _exchDataCache._graphClient;
-        connCache._ewsClient = _exchDataCache._ewsClient;
-        connCache._mail = _exchDataCache._mail;
+        connCache.organizationAuthParameters = exchDataCache.organizationAuthParameters;
+        connCache.graphClient = exchDataCache.graphClient;
+        connCache.ewsClient = exchDataCache.ewsClient;
+        connCache.mail = exchDataCache.mail;
         M365ProxyGlobalVals.g_exch_conn_caches.put(threadUuid, connCache);
 
         return true;
     }
 
     public static class ExchDataCache{
-        public Map<String, String> _organizationAuthParameters;
-        public ExchangeService _ewsClient = null;
-        public GraphServiceClient<Request> _graphClient = null;
-        public List<Map> _soapClientCache = null;
-        public String _structContentFile = "";
-        public byte[] _mimecontent = null;
-        public BufferedReader _soapResponseReader = null;
-        public String _mail = "";
+        public Map<String, String> organizationAuthParameters;
+        public ExchangeService ewsClient = null;
+        public GraphServiceClient<Request> graphClient = null;
+        public SoapBaseRequest soapClient;
+        public String structContentFile = "";
+        public byte[] mimecontent = null;
+        public String mail = "";
     }
 }

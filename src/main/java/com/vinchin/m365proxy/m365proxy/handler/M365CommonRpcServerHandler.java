@@ -95,8 +95,8 @@ public class M365CommonRpcServerHandler extends M365ProxyRpcServer {
     }
 
     public void destroy(){
-        _clientAttachment = null;
-        _clientChannel = null;
+        clientAttachment = null;
+        clientChannel = null;
     }
 
 }

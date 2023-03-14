@@ -23,9 +23,7 @@ import org.apache.http.ssl.TrustStrategy;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
-import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -40,7 +38,7 @@ public class SoapBaseRequest extends BaseRequest {
     private Map<String, String> authParameters;
     private CloseableHttpClient httpClient;
     private BufferedReader xmlStreamReaderCache;
-    protected HttpPost soapClient = null;
+    protected HttpPost soapHttpClient = null;
     protected HttpClientContext httpContext = null;
     public SoapBaseRequest(){
 
@@ -67,16 +65,16 @@ public class SoapBaseRequest extends BaseRequest {
         authParameters = organizationRegionAuthParameters;
     }
 
-    public void setSoapClient(String mailbox){
+    public void setSoapHttpClient(String mailbox){
         try {
-            soapClient = new HttpPost(tokenEndPoint);
-            soapClient.addHeader("Content-type", "text/xml; charset=utf-8");
-            soapClient.addHeader("User-Agent", "EWS");
-            soapClient.addHeader("Accept", "text/xml");
-            soapClient.addHeader("Keep-Alive", "300");
-            soapClient.addHeader("Connection", "Keep-Alive");
-            soapClient.addHeader("Accept-Encoding", "gzip,deflate");
-            soapClient.addHeader("X-AnchorMailbox", mailbox);
+            soapHttpClient = new HttpPost(tokenEndPoint);
+            soapHttpClient.addHeader("Content-type", "text/xml; charset=utf-8");
+            soapHttpClient.addHeader("User-Agent", "EWS");
+            soapHttpClient.addHeader("Accept", "text/xml");
+            soapHttpClient.addHeader("Keep-Alive", "300");
+            soapHttpClient.addHeader("Connection", "Keep-Alive");
+            soapHttpClient.addHeader("Accept-Encoding", "gzip,deflate");
+            soapHttpClient.addHeader("X-AnchorMailbox", mailbox);
 
             if (BaseUtil.RegionEnum.getRegionEnumByRegion(region) == LOCAL){
                 RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
@@ -84,11 +82,11 @@ public class SoapBaseRequest extends BaseRequest {
                         .setRedirectsEnabled(true)
                         .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM));
 
-                soapClient.setConfig(requestConfigBuilder.build());
+                soapHttpClient.setConfig(requestConfigBuilder.build());
             } else {
                 initAuthParameters(BaseUtil.ApiTypeEnum.EWSAPI, authParameters);
                 String token = getAccessToken();
-                soapClient.addHeader("Authorization", "Bearer " + token);
+                soapHttpClient.addHeader("Authorization", "Bearer " + token);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,9 +99,9 @@ public class SoapBaseRequest extends BaseRequest {
         try {
             SSLConnectionSocketFactory connectionSocketFactory = getSSLConnectionSocketFactory();
             StringEntity entity = new StringEntity(xml);
-            soapClient.setEntity(entity);
+            soapHttpClient.setEntity(entity);
             httpClient = HttpClients.custom().setSSLSocketFactory(connectionSocketFactory).build();
-            HttpResponse httpResponse = httpClient.execute(soapClient, httpContext);
+            HttpResponse httpResponse = httpClient.execute(soapHttpClient, httpContext);
             if(httpResponse.getStatusLine().getStatusCode() == 200){
                 HttpEntity entity1 = httpResponse.getEntity();
 
@@ -125,6 +123,25 @@ public class SoapBaseRequest extends BaseRequest {
             }
         } catch (Exception e){
             return null;
+        }
+    }
+
+    public boolean doStreamSoapRequest(String xml){
+        try {
+            SSLConnectionSocketFactory connectionSocketFactory = getSSLConnectionSocketFactory();
+            StringEntity entity = new StringEntity(xml);
+            soapHttpClient.setEntity(entity);
+            httpClient = HttpClients.custom().setSSLSocketFactory(connectionSocketFactory).build();
+            HttpResponse httpResponse = httpClient.execute(soapHttpClient, httpContext);
+            if(httpResponse.getStatusLine().getStatusCode() == 200){
+                HttpEntity entity1 = httpResponse.getEntity();
+                xmlStreamReaderCache = new BufferedReader(new InputStreamReader(entity1.getContent()));
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e){
+            return false;
         }
     }
 
@@ -150,12 +167,16 @@ public class SoapBaseRequest extends BaseRequest {
         return new SSLConnectionSocketFactory(sslContexts, new NoopHostnameVerifier());
     }
 
-    public HttpPost getSoapClient(){
-        return soapClient;
+    public HttpPost getSoapHttpClient(){
+        return soapHttpClient;
     }
 
     public HttpClientContext getHttpContext(){
         return httpContext;
+    }
+
+    public BufferedReader getXmlStreamReaderCache() {
+        return xmlStreamReaderCache;
     }
 
     public void forceDestroyHttpResource(){

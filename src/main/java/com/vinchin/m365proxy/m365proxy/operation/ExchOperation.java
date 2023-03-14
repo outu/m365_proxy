@@ -83,20 +83,13 @@ public class ExchOperation {
 
         //get soap connect handle
         SoapBaseRequest soapBaseRequest = new SoapBaseRequest(organizationAuthParameters);
-        soapBaseRequest.setSoapClient(connUserMessage.username);
+        soapBaseRequest.setSoapHttpClient(connUserMessage.username);
         soapBaseRequest.setHttpContext();
-        Map<String, HttpPost> soapClientMap = new HashMap<>();
-        soapClientMap.put("soapClient", soapBaseRequest.getSoapClient());
-        Map<String, HttpClientContext> httpContextMap = new HashMap<>();
-        httpContextMap.put("httpContext", soapBaseRequest.getHttpContext());
-        List<Map> soapClientCache = new ArrayList<>();
-        soapClientCache.add(soapClientMap);
-        soapClientCache.add(httpContextMap);
 
-        dataCache._ewsClient = ewsClient;
-        dataCache._soapClientCache = soapClientCache;
-        dataCache._organizationAuthParameters = organizationAuthParameters;
-        dataCache._mail = connUserMessage.mail;
+        dataCache.ewsClient = ewsClient;
+        dataCache.soapClient = soapBaseRequest;
+        dataCache.organizationAuthParameters = organizationAuthParameters;
+        dataCache.mail = connUserMessage.mail;
 
         return dataCache;
     }
@@ -121,22 +114,15 @@ public class ExchOperation {
 
         //get soap connect handle
         SoapBaseRequest soapBaseRequest = new SoapBaseRequest(organizationAuthParameters);
-        soapBaseRequest.setSoapClient(connUserMessage.username);
+        soapBaseRequest.setSoapHttpClient(connUserMessage.username);
         soapBaseRequest.setHttpContext();
-        Map<String, HttpPost> soapClientMap = new HashMap<>();
-        soapClientMap.put("soapClient", soapBaseRequest.getSoapClient());
-        Map<String, HttpClientContext> httpContextMap = new HashMap<>();
-        httpContextMap.put("httpContext", soapBaseRequest.getHttpContext());
-        List<Map> soapClientCache = new ArrayList<>();
-        soapClientCache.add(soapClientMap);
-        soapClientCache.add(httpContextMap);
 
         ExchRpcServerHandler.ExchDataCache dataCache = new ExchRpcServerHandler.ExchDataCache();
-        dataCache._ewsClient = ewsClient;
-        dataCache._graphClient = graphClient;
-        dataCache._soapClientCache = soapClientCache;
-        dataCache._organizationAuthParameters = organizationAuthParameters;
-        dataCache._mail = connUserMessage.mail;
+        dataCache.ewsClient = ewsClient;
+        dataCache.graphClient = graphClient;
+        dataCache.soapClient = soapBaseRequest;
+        dataCache.organizationAuthParameters = organizationAuthParameters;
+        dataCache.mail = connUserMessage.mail;
 
         return dataCache;
     }
@@ -147,7 +133,7 @@ public class ExchOperation {
      * @return
      * @throws Exception
      */
-    public String getRootFolder(ExchangeService ewsClient, List<Map> soapClientCache, String mail) throws Exception {
+    public String getRootFolder(ExchangeService ewsClient, SoapBaseRequest soapClient, String mail) throws Exception {
         FolderRequests folderRequests = new FolderRequests(ewsClient);
         List<JSONObject> rootFolderListObject = new ArrayList<>();
 
@@ -178,7 +164,7 @@ public class ExchOperation {
         rootFolderListObject.add(rootFolderObject);
 
         //use soap request to get archive/conversationhistory root folder
-        com.vinchin.m365proxy.apis.soap.FolderRequests soapFolderRequests = new com.vinchin.m365proxy.apis.soap.FolderRequests(soapClientCache);
+        com.vinchin.m365proxy.apis.soap.FolderRequests soapFolderRequests = new com.vinchin.m365proxy.apis.soap.FolderRequests(soapClient.getSoapHttpClient(), soapClient.getHttpContext());
         XmlRequestData xmlRequestData = new XmlRequestData();
         String xmlToGetArchiveFolder = xmlRequestData.buildXmlToGetRootFolder(mail, "archive");
         rootFolderObject = soapFolderRequests.getFolder(xmlToGetArchiveFolder);

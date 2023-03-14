@@ -35,10 +35,10 @@ import static com.vinchin.m365proxy.m365proxy.message.M365CommonRpcMessageDefine
 
 public class M365ProxyRpcServer {
     public static final Logger logger = LoggerFactory.getLogger(M365ProxyRpcServer.class);
-    protected AsynchronousSocketChannel _clientChannel;
-    protected M365ProxyListenConnection _clientAttachment;
+    protected AsynchronousSocketChannel clientChannel;
+    protected M365ProxyListenConnection clientAttachment;
 
-    protected ExchRpcServerHandler.ExchDataCache _exchDataCache = null;
+    protected ExchRpcServerHandler.ExchDataCache exchDataCache = null;
 
     /**
      * thread manager control child socket thread destroy flag
@@ -51,8 +51,8 @@ public class M365ProxyRpcServer {
      * @param attachment The type of the object attached to the I/O operation
      */
     public void init(AsynchronousSocketChannel socketChannel, M365ProxyListenConnection attachment){
-        _clientChannel = socketChannel;
-        _clientAttachment = attachment;
+        clientChannel = socketChannel;
+        clientAttachment = attachment;
     }
 
     /**
@@ -136,22 +136,22 @@ public class M365ProxyRpcServer {
         switch (m365RpcOpType){
             case M365_RPC_OP_TYPE_COMMON:
                 M365CommonRpcServerHandler commonRpcHandler = new M365CommonRpcServerHandler();
-                commonRpcHandler.init(_clientChannel, _clientAttachment);
+                commonRpcHandler.init(clientChannel, clientAttachment);
                 ret = commonRpcHandler.handleRpcM365CommonPacket(privateRpcOpcode, byteBuffer, length);
                 commonRpcHandler.destroy();
                 break;
             case M365_RPC_OP_TYPE_EXCH:
                 ExchRpcServerHandler exchRpcHandler = new ExchRpcServerHandler();
-                exchRpcHandler.init(_clientChannel, _clientAttachment);
+                exchRpcHandler.init(clientChannel, clientAttachment);
 
-                if (_exchDataCache != null){
-                    exchRpcHandler.setExchDataCache(_exchDataCache);
+                if (exchDataCache != null){
+                    exchRpcHandler.setExchDataCache(exchDataCache);
                 }
 
                 ret = exchRpcHandler.handleRpcExchPacket(privateRpcOpcode, byteBuffer, length);
 
-                if (_exchDataCache == null && exchRpcHandler.getExchDataCache() != null){
-                    _exchDataCache = exchRpcHandler.getExchDataCache();
+                if (exchDataCache == null && exchRpcHandler.getExchDataCache() != null){
+                    exchDataCache = exchRpcHandler.getExchDataCache();
                 }
                 exchRpcHandler.destroy();
                 break;
@@ -196,7 +196,7 @@ public class M365ProxyRpcServer {
         ByteBuffer byteBuffer = ByteBuffer.allocate(length);
 
         try{
-            int recvLength = _clientChannel.read(byteBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
+            int recvLength = clientChannel.read(byteBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
             if (recvLength < 0){
                 errorCode.setErrorCode(BD_RPC_NETWORK_ERROR.getCode());
                 return null;
@@ -221,7 +221,7 @@ public class M365ProxyRpcServer {
         int needSendLength = sendBuffer.capacity();
 
         try{
-            int sendLength = _clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
+            int sendLength = clientChannel.write(sendBuffer).get(M365_DEFAULT_RPC_TIMEOUT, TimeUnit.SECONDS);
             if (sendLength != needSendLength){
                 ret = BD_RPC_NETWORK_ERROR.getCode();
             }

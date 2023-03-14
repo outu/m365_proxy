@@ -28,7 +28,7 @@ import static com.vinchin.m365proxy.m365proxy.M365ProxyError.BdErrorCode.BD_GENE
 
 public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocketChannel, M365ProxyListenConnection> {
     public static final Logger logger = LoggerFactory.getLogger(M365ProxyWorkThread.class);
-    private AsynchronousSocketChannel _clientChannel;
+    private AsynchronousSocketChannel clientChannel;
 
     private String _threadUuid;
 
@@ -52,7 +52,7 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
 
             if (BD_GENERIC_SUCCESS.getCode() == ret){
                 logger.debug("add thread: " + _threadUuid + " to map thread obj");
-                _clientChannel = socketChannel;
+                clientChannel = socketChannel;
                 M365ProxyRpcServer rpcServer = new M365ProxyRpcServer();
                 rpcServer.init(socketChannel, attachment);
                 rpcServer.waitAndHandleRequest();
@@ -111,8 +111,8 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
                 attachment._workThreadManager.remove(_threadUuid);
             }
 
-            _clientChannel.close();
-            _clientChannel = null;
+            clientChannel.close();
+            clientChannel = null;
         } catch (IOException e){
             logger.warn("thread " + _threadUuid + "self destroy error: " + e.getMessage());
         }

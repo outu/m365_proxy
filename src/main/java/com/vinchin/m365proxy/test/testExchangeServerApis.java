@@ -3,6 +3,7 @@ package com.vinchin.m365proxy.test;
 import com.vinchin.m365proxy.apis.ews.FolderRequests;
 import com.vinchin.m365proxy.apis.ews.MessageRequests;
 import com.vinchin.m365proxy.apis.powershell.PowershellExchangeOperation;
+import com.vinchin.m365proxy.apis.soap.SoapBaseRequest;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 
 import java.io.ByteArrayInputStream;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class testExchangeServerApis {
-    private static List<Map> soapClient;
+    private static SoapBaseRequest soapClient;
     private static ExchangeService ewsClient;
     private static PowershellExchangeOperation powershellClient;
 
