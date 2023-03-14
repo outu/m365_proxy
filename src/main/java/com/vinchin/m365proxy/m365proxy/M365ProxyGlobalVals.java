@@ -14,10 +14,12 @@
 package com.vinchin.m365proxy.m365proxy;
 
 import com.microsoft.graph.requests.GraphServiceClient;
+import com.vinchin.m365proxy.apis.powershell.PowershellExchangeOperation;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import okhttp3.Request;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class M365ProxyGlobalVals {

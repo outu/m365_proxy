@@ -66,7 +66,8 @@ public class M365ProxyError {
         M365_GET_GROUP_LIST_ERROR(1003),                                                     //get group list error
         M365_CONNECT_USER_BY_GRAPH_ERROR(1004),                                              //use graph api connect user error
         M365_CONNECT_USER_BY_EWS_ERROR(1005),                                                //use ews api connect user error
-        M365_GET_USER_ROOT_FOLDER_INFO_ERROR(1006);                                          //get user root folder info error
+        M365_GET_USER_ROOT_FOLDER_INFO_ERROR(1006),                                          //get user root folder info error
+        M365_DETECT_ENV_GENERIC_ERROR(1007);                                                 //detect m365 env generic error
 
 
         private int errorCode = 0;

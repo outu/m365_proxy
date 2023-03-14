@@ -2,6 +2,8 @@ package com.vinchin.m365proxy.apis.soap;
 
 import com.vinchin.m365proxy.apis.BaseRequest;
 import com.vinchin.m365proxy.apis.BaseUtil;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -11,11 +13,19 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
 
+
 import javax.net.ssl.SSLContext;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -28,11 +38,10 @@ public class SoapBaseRequest extends BaseRequest {
     private String tokenEndPoint = null;
     private int region = 0;
     private Map<String, String> authParameters;
-
+    private CloseableHttpClient httpClient;
+    private BufferedReader xmlStreamReaderCache;
     protected HttpPost soapClient = null;
-
     protected HttpClientContext httpContext = null;
-
     public SoapBaseRequest(){
 
     }
@@ -57,7 +66,6 @@ public class SoapBaseRequest extends BaseRequest {
 
         authParameters = organizationRegionAuthParameters;
     }
-
 
     public void setSoapClient(String mailbox){
         try {
@@ -87,6 +95,38 @@ public class SoapBaseRequest extends BaseRequest {
         }
     }
 
+    public String doSoapRequest(String xml){
+        StringBuilder responseXmlData = new StringBuilder();
+
+        try {
+            SSLConnectionSocketFactory connectionSocketFactory = getSSLConnectionSocketFactory();
+            StringEntity entity = new StringEntity(xml);
+            soapClient.setEntity(entity);
+            httpClient = HttpClients.custom().setSSLSocketFactory(connectionSocketFactory).build();
+            HttpResponse httpResponse = httpClient.execute(soapClient, httpContext);
+            if(httpResponse.getStatusLine().getStatusCode() == 200){
+                HttpEntity entity1 = httpResponse.getEntity();
+
+                char[] readbuffer = new char[1024];
+
+                xmlStreamReaderCache = new BufferedReader(new InputStreamReader(entity1.getContent()));
+                int count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
+                while (count > 0) {
+                    responseXmlData.append(String.copyValueOf(readbuffer, 0, count));
+                    count =  xmlStreamReaderCache.read(readbuffer, 0, 1024);
+                }
+
+                xmlStreamReaderCache.close();
+                httpClient.close();
+
+                return responseXmlData.toString();
+            } else {
+                return null;
+            }
+        } catch (Exception e){
+            return null;
+        }
+    }
 
     public void setHttpContext(){
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -110,13 +150,20 @@ public class SoapBaseRequest extends BaseRequest {
         return new SSLConnectionSocketFactory(sslContexts, new NoopHostnameVerifier());
     }
 
-
     public HttpPost getSoapClient(){
         return soapClient;
     }
 
-
     public HttpClientContext getHttpContext(){
         return httpContext;
+    }
+
+    public void forceDestroyHttpResource(){
+        try{
+            xmlStreamReaderCache.close();
+            httpClient.close();
+        } catch (Exception e){
+            //do nothing
+        }
     }
 }

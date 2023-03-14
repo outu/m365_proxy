@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 
 import com.vinchin.m365proxy.apis.BaseUtil;
@@ -257,11 +258,8 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
         try {
             String userRootFolder = "";
             ExchOperation exchOp = new ExchOperation();
-            if (Integer.parseInt(_exchDataCache._organizationAuthParameters.get("region")) != BaseUtil.RegionEnum.LOCAL.getCode()){
-                userRootFolder = exchOp.getRootFolder(_exchDataCache._ewsClient, _exchDataCache._graphClient, _exchDataCache._mail);
-            } else {
-                userRootFolder = exchOp.getRootFolder(_exchDataCache._ewsClient);
-            }
+            userRootFolder = exchOp.getRootFolder(_exchDataCache._ewsClient, _exchDataCache._soapClientCache, _exchDataCache._mail);
+
             byte[] askInfo = TypeConversion.stringToBytes(userRootFolder);
             ret = buildAndSendAskMsg(ExchRpcMessageDefine.ExchRpcOpcode.EXCH_RPC_OPCODE_GET_ROOT_FOLDER.getOpCode(), askInfo, 0);
         } catch (Exception e){
@@ -305,6 +303,7 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
         public Map<String, String> _organizationAuthParameters;
         public ExchangeService _ewsClient = null;
         public GraphServiceClient<Request> _graphClient = null;
+        public List<Map> _soapClientCache = null;
         public String _structContentFile = "";
         public byte[] _mimecontent = null;
         public BufferedReader _soapResponseReader = null;

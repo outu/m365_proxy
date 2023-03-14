@@ -2,30 +2,44 @@ package com.vinchin.m365proxy.apis.ews;
 
 import com.alibaba.fastjson.JSONObject;
 import microsoft.exchange.webservices.data.core.ExchangeService;
+import microsoft.exchange.webservices.data.core.PropertySet;
+import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
+import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
+import microsoft.exchange.webservices.data.property.complex.FolderId;
+import microsoft.exchange.webservices.data.property.complex.FolderPermissionCollection;
 import microsoft.exchange.webservices.data.search.FindFoldersResults;
 import microsoft.exchange.webservices.data.search.FolderView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FolderRequests extends EwsBaseRequest {
     public FolderRequests(ExchangeService ewsClientCache){
         ewsClient = ewsClientCache;
     }
 
-    public String getFolderInfo(WellKnownFolderName folderName, int type, int folderNum) throws Exception {
+    public JSONObject getFolderInfo(WellKnownFolderName folderName) throws Exception {
         Folder folder = Folder.bind(ewsClient, folderName);
         JSONObject folderInfo = new JSONObject();
         folderInfo.put("folder_id", folder.getId().getUniqueId());
         folderInfo.put("parent_folder_id", folder.getParentFolderId().getUniqueId());
         folderInfo.put("display_name", folder.getDisplayName());
-        folderInfo.put("type", type);
-        folderInfo.put("folder_num", folderNum);
 
-        return folderInfo.toJSONString();
+        return folderInfo;
     }
+
+//    public String getFolderInfo(WellKnownFolderName folderName) throws Exception {
+//        Folder folder = Folder.bind(ewsClient, folderName);
+//        JSONObject folderInfo = new JSONObject();
+//        folderInfo.put("folder_id", folder.getId().getUniqueId());
+//        folderInfo.put("parent_folder_id", folder.getParentFolderId().getUniqueId());
+//        folderInfo.put("display_name", folder.getDisplayName());
+//
+//        return folderInfo.toJSONString();
+//    }
 
 
 
