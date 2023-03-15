@@ -19,23 +19,22 @@ import java.util.List;
 import java.util.Objects;
 
 public class MessageRequests extends GraphBaseRequest {
-    public MessageRequests(GraphServiceClient<Request> graphClientCache, String userId){
+    public MessageRequests(GraphServiceClient<Request> graphClientCache, String mailCache){
         graphClient = graphClientCache;
-        backupUserId = userId;
+        mail = mailCache;
     }
 
     /**
      * @Description the normal interface of get mail child folder
      * @param rootFolderId need to get child folder of the root folder
      * @return
-     * @throws Exception
      */
-    public String getMailChildFolder(String rootFolderId) throws Exception {
+    public String getMailChildFolder(String rootFolderId) {
         String mailChildFolderJson = "";
         List<JSONObject> mailChildFolderList = new ArrayList<>();
 
         rootFolderId = GraphUtil.graphIdConvertToEwsId(rootFolderId);
-        MailFolderCollectionPage childFolders = graphClient.users(backupUserId).mailFolders(rootFolderId).childFolders()
+        MailFolderCollectionPage childFolders = graphClient.users(mail).mailFolders(rootFolderId).childFolders()
                 .buildRequest()
                 .select("id,displayName,parentFolderId")
                 .get();
@@ -64,7 +63,7 @@ public class MessageRequests extends GraphBaseRequest {
      * @return
      */
     public String getFolderInfo(String folderName, int type, int folderNum) {
-        MailFolder mailFolder = graphClient.users(backupUserId).mailFolders(folderName)
+        MailFolder mailFolder = graphClient.users(mail).mailFolders(folderName)
                 .buildRequest()
                 .select("id,displayName,parentFolderId")
                 .get();
@@ -128,21 +127,21 @@ public class MessageRequests extends GraphBaseRequest {
         rootFolderId = GraphUtil.graphIdConvertToEwsId(rootFolderId);
         if(Objects.equals(deltaLink, "")){
             if (!Objects.equals(skipToken, "")){
-                mailFolderDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(rootFolderId).childFolders()
+                mailFolderDeltaCollectionPage = graphClient.users(mail).mailFolders(rootFolderId).childFolders()
                         .delta()
                         .buildRequest()
                         .select("id,displayName,parentFolderId")
                         .skipToken(skipToken)
                         .get();
             } else {
-                mailFolderDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(rootFolderId).childFolders()
+                mailFolderDeltaCollectionPage = graphClient.users(mail).mailFolders(rootFolderId).childFolders()
                         .delta()
                         .buildRequest()
                         .select("id,displayName,parentFolderId")
                         .get();
             }
         } else {
-            mailFolderDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(rootFolderId).childFolders()
+            mailFolderDeltaCollectionPage = graphClient.users(mail).mailFolders(rootFolderId).childFolders()
                     .delta()
                     .buildRequest()
                     .select("id,displayName,parentFolderId")
@@ -176,7 +175,7 @@ public class MessageRequests extends GraphBaseRequest {
             syncMailFolderInfoJsonObject.put("mail_folder_delta_token", mailFolderDeltaCollectionPage.deltaLink());
         }
 
-        syncMailFolderInfoJsonObject.put("sync_mail_folder_list", mailChildFolderList);
+        syncMailFolderInfoJsonObject.put("syncmail_folder_list", mailChildFolderList);
         syncMailFolderInfoJsonObject.put("mail_folder_skip_token", newSkipToken);
 
         syncMailChildFolderJson = syncMailFolderInfoJsonObject.toString();
@@ -203,21 +202,21 @@ public class MessageRequests extends GraphBaseRequest {
         requestOptions.add(new HeaderOption("Prefer", "outlook.body-content-type=\"text\""));
         if(Objects.equals(deltaLink, "")){
             if (!Objects.equals(skipToken, "")){
-                messageDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(folderId).messages()
+                messageDeltaCollectionPage = graphClient.users(mail).mailFolders(folderId).messages()
                         .delta()
                         .buildRequest(requestOptions)
                         .select("id,parentFolderId,subject,body,receivedDateTime,toRecipients,sender,ccRecipients")
                         .skipToken(skipToken)
                         .get();
             } else {
-                messageDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(folderId).messages()
+                messageDeltaCollectionPage = graphClient.users(mail).mailFolders(folderId).messages()
                         .delta()
                         .buildRequest(requestOptions)
                         .select("id,parentFolderId,subject,body,receivedDateTime,toRecipients,sender,ccRecipients")
                         .get();
             }
         } else {
-            messageDeltaCollectionPage = graphClient.users(backupUserId).mailFolders(folderId).messages()
+            messageDeltaCollectionPage = graphClient.users(mail).mailFolders(folderId).messages()
                     .delta()
                     .buildRequest(requestOptions)
                     .select("id,parentFolderId,subject,body,receivedDateTime,toRecipients,sender,ccRecipients")

@@ -37,7 +37,7 @@ public class SoapBaseRequest extends BaseRequest {
     private int region = 0;
     private Map<String, String> authParameters;
     private CloseableHttpClient httpClient;
-    private BufferedReader xmlStreamReaderCache;
+    protected BufferedReader xmlStreamReaderCache;
     protected HttpPost soapHttpClient = null;
     protected HttpClientContext httpContext = null;
     public SoapBaseRequest(){

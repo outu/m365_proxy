@@ -30,7 +30,7 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
     public static final Logger logger = LoggerFactory.getLogger(M365ProxyWorkThread.class);
     private AsynchronousSocketChannel clientChannel;
 
-    private String _threadUuid;
+    private String threadUuid;
 
     /**
      * @Description Invoked when an operation has completed.
@@ -51,7 +51,7 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
             ret = addMapThreadUuidToThreadObj(attachment);
 
             if (BD_GENERIC_SUCCESS.getCode() == ret){
-                logger.debug("add thread: " + _threadUuid + " to map thread obj");
+                logger.debug("add thread: " + threadUuid + " to map thread obj");
                 clientChannel = socketChannel;
                 M365ProxyRpcServer rpcServer = new M365ProxyRpcServer();
                 rpcServer.init(socketChannel, attachment);
@@ -59,11 +59,11 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
             }
 
             destroy(attachment);
-            logger.debug("connection closed, thread: " + _threadUuid + " exit");
+            logger.debug("connection closed, thread: " + threadUuid + " exit");
         } catch (Exception e) {
             destroy(attachment);
             logger.error("handle connection message failed: " + e.getMessage());
-            logger.debug("connection closed, thread: " + _threadUuid + " exit");
+            logger.debug("connection closed, thread: " + threadUuid + " exit");
         }
     }
 
@@ -90,10 +90,10 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
         int ret = BD_GENERIC_SUCCESS.getCode();
 
         try {
-            _threadUuid = getThreadUuid();
-            attachment._workThreadManager.put(_threadUuid, Thread.currentThread());
+            threadUuid = getThreadUuid();
+            attachment._workThreadManager.put(threadUuid, Thread.currentThread());
         } catch (Exception e){
-            logger.error("add thread: " + _threadUuid + "to work thread manager error: " + e.getMessage());
+            logger.error("add thread: " + threadUuid + "to work thread manager error: " + e.getMessage());
             ret = BD_GENERIC_ERROR.getCode();
         }
 
@@ -106,15 +106,15 @@ public class M365ProxyWorkThread implements CompletionHandler<AsynchronousSocket
      */
     private synchronized void destroy(M365ProxyListenConnection attachment){
         try {
-            boolean containKey = attachment._workThreadManager.containsKey(_threadUuid);
+            boolean containKey = attachment._workThreadManager.containsKey(threadUuid);
             if (containKey){
-                attachment._workThreadManager.remove(_threadUuid);
+                attachment._workThreadManager.remove(threadUuid);
             }
 
             clientChannel.close();
             clientChannel = null;
         } catch (IOException e){
-            logger.warn("thread " + _threadUuid + "self destroy error: " + e.getMessage());
+            logger.warn("thread " + threadUuid + "self destroy error: " + e.getMessage());
         }
     }
 

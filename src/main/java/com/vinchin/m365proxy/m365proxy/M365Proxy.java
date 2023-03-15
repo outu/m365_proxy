@@ -29,18 +29,18 @@ public class M365Proxy {
         }
 
         if (app.getExit()){
-            M365ProxyGlobalVals.g_service_exit_flag = true;
+            M365ProxyGlobalVals.gServiceExitFlag = true;
         }
 
         // global initialize
-        if (ret && !M365ProxyGlobalVals.g_service_exit_flag){
+        if (ret && !M365ProxyGlobalVals.gServiceExitFlag){
             ret = app.globalInit();
             if (!ret){
                 logger.error("global initialize error.");
             }
         }
 
-        if(ret && !M365ProxyGlobalVals.g_service_exit_flag){
+        if(ret && !M365ProxyGlobalVals.gServiceExitFlag){
             logger.debug("m365_proxy start ...");
             ret = app.main(args);
             if (!ret){

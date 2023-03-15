@@ -40,7 +40,7 @@ public class M365ProxyListenConnection {
     public String _processUuid;
     public boolean _stop = false;
     public Map<String, Thread> _workThreadManager = new HashMap<>();
-    private int _threadPoolNum;
+    private int _appName;
     private ExecutorService _executorService;
     private AsynchronousServerSocketChannel _serverChannel;
     private AsynchronousChannelGroup _channelGroup;
@@ -49,12 +49,12 @@ public class M365ProxyListenConnection {
      * @Description init socket port
      * @param port socket port
      * @param uuid process uuid
-     * @param threadPoolNum Socket listens to the number of threads in the asynchronous execution thread pool
+     * @param appName Socket listens to the number of threads in the asynchronous execution thread pool
      */
-    public void init(int port, String uuid, int threadPoolNum){
+    public void init(int port, String uuid, int appName){
         _listenPort = port;
         _processUuid = uuid;
-        _threadPoolNum = threadPoolNum;
+        _appName = appName;
     }
 
     /**
@@ -66,7 +66,7 @@ public class M365ProxyListenConnection {
 
         try {
             // Initialize fixed length thread pool
-            _executorService = Executors.newFixedThreadPool(_threadPoolNum);
+            _executorService = Executors.newFixedThreadPool(_appName);
             _channelGroup = AsynchronousChannelGroup.withThreadPool(_executorService);
             // Init AsynchronousServerSocketChannel
             _serverChannel = AsynchronousServerSocketChannel.open(_channelGroup);
@@ -82,7 +82,7 @@ public class M365ProxyListenConnection {
             _serverChannel.accept(this, new M365ProxyWorkThread());
             while(true){
                 if (_stop){
-                    M365ProxyGlobalVals.g_service_exit_flag = true;
+                    M365ProxyGlobalVals.gServiceExitFlag = true;
                     break;
                 }
                 TimeUnit.SECONDS.sleep(1L);

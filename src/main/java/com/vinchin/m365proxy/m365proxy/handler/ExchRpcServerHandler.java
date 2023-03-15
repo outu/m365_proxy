@@ -293,8 +293,9 @@ public class ExchRpcServerHandler extends M365ProxyRpcServer {
         connCache.organizationAuthParameters = exchDataCache.organizationAuthParameters;
         connCache.graphClient = exchDataCache.graphClient;
         connCache.ewsClient = exchDataCache.ewsClient;
+        connCache.soapClient = exchDataCache.soapClient;
         connCache.mail = exchDataCache.mail;
-        M365ProxyGlobalVals.g_exch_conn_caches.put(threadUuid, connCache);
+        M365ProxyGlobalVals.gExchConnCaches.put(threadUuid, connCache);
 
         return true;
     }

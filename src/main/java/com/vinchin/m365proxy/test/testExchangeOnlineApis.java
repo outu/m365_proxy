@@ -3,6 +3,7 @@ package com.vinchin.m365proxy.test;
 import com.alibaba.fastjson.JSONObject;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.vinchin.m365proxy.apis.ews.FolderRequests;
+import com.vinchin.m365proxy.apis.graph.common.ApplicationRequests;
 import com.vinchin.m365proxy.apis.graph.common.UserRequests;
 import com.vinchin.m365proxy.apis.graph.exchange.MessageRequests;
 import microsoft.exchange.webservices.data.core.ExchangeService;
@@ -19,42 +20,9 @@ public class testExchangeOnlineApis {
     private static GraphServiceClient<Request> graphClient;
 
     public static void main(String[] args) throws Exception {
-        SAXReader reader = new SAXReader();
-        Document document = reader.read("F:/soap_data_1145.xml");
-
-        Element rootElement = document.getRootElement();
-        Element responseMessageElement = rootElement.element("Body").element("GetFolderResponse").element("ResponseMessages").element("GetFolderResponseMessage");
-        Element responseCodeElement = responseMessageElement.element("ResponseCode");
-        if (!Objects.equals(responseCodeElement.getText(), "NoError")){
-            //return folderInfo.toJSONString();
-        } else {
-            JSONObject folderInfo = new JSONObject();
-            Element folderInfoElement = responseMessageElement.element("Folders").element("Folder");
-            List<Element> folderInfoList = folderInfoElement.elements();
-            for(Element subElement : folderInfoList){
-                String name = subElement.getName();
-                if (Objects.equals(name, "FolderId")){
-                    folderInfo.put("folder_id", subElement.attribute("Id").getText());
-                }
-
-                if (Objects.equals(name, "ParentFolderId")){
-                    folderInfo.put("parent_folder_id", subElement.attribute("Id").getText());
-                }
-
-                if (Objects.equals(name, "DisplayName")){
-                    folderInfo.put("display_name", subElement.getText());
-                }
-
-                if (Objects.equals(name, "ChildFolderCount")){
-                    folderInfo.put("child_folder_name", subElement.getText());
-                }
-            }
-
-            System.out.println(folderInfo.toString());
-        }
-//        String mailbox = "yunqi@s22fb.onmicrosoft.com";
-//        initClient(mailbox);
-//        System.out.println(getAllTypeRootFolder());
+        String mailbox = "yunqi@s22fb.onmicrosoft.com";
+        initClient(mailbox);
+        System.out.println(getAzureADInfo());
 //        ContactRequests contactRequests = new ContactRequests(ewsClient);
 //        contactRequests.getContactGroup();
         //System.out.printf("%s", syncGetMessageInfo("AQMkAGI1ZmRjZWUAZC0yZTVlLTQyMzctYTc4Ni0yYjE3NDMxMjdhOGYALgAAAy5x2W1SrcBDvroL1Asx4J8BAKuvciembiNLk9i11WPD-4EAAAIBDAAAAA==","yunqi@s22fb.onmicrosoft.com","",""));
@@ -108,6 +76,13 @@ public class testExchangeOnlineApis {
         FolderRequests folderRequests = new FolderRequests(ewsClient);
 
         return folderRequests.getAllTypeRootFolder();
+    }
+
+
+    public static List<String> getAzureADInfo(){
+        ApplicationRequests applicationRequests = new ApplicationRequests(graphClient);
+
+        return applicationRequests.getAzureADAppAuthResourceAccess("75858a99-700e-4100-aa5c-11fbdcb82f22");
     }
 
 
