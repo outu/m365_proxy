@@ -135,10 +135,11 @@ public class ExchOperation {
      */
     public String getRootFolder(ExchangeService ewsClient, SoapBaseRequest soapClient, String mail) throws Exception {
         FolderRequests folderRequests = new FolderRequests(ewsClient);
+        JSONObject rootFolderObject = new JSONObject();
         List<JSONObject> rootFolderListObject = new ArrayList<>();
 
         //get all mail root folder
-        JSONObject rootFolderObject = folderRequests.getFolderInfo(WellKnownFolderName.Inbox);
+        rootFolderObject = folderRequests.getFolderInfo(WellKnownFolderName.Inbox);
         rootFolderObject.put("type", BaseUtil.ExchDataType.MESSAGE.getCode());
         rootFolderObject.put("folder_num", BaseUtil.ExchFolderNum.INBOX.getNum());
         rootFolderListObject.add(rootFolderObject);

@@ -1,10 +1,12 @@
 package com.vinchin.m365proxy.apis.graph.common;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.microsoft.graph.models.Group;
 import com.microsoft.graph.models.User;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.GroupDeltaCollectionPage;
+import com.microsoft.graph.requests.UserCollectionPage;
 import com.microsoft.graph.requests.UserDeltaCollectionPage;
 import com.vinchin.m365proxy.apis.graph.GraphBaseRequest;
 import okhttp3.Request;
@@ -18,6 +20,34 @@ public class UserRequests extends GraphBaseRequest {
         graphClient = graphClientCache;
     }
 
+    /**
+     * @Description get user list
+     * @return user list
+     */
+    public String getUserList(){
+        List<JSONObject> userList = new ArrayList<>();
+
+        UserCollectionPage userCollectionPage = graphClient.users()
+                .buildRequest()
+                .get();
+        int size = userCollectionPage.getCurrentPage().size();
+        if (size > 0){
+            for (int i = 0; i < size; i++){
+                User user = userCollectionPage.getCurrentPage().get(i);
+                if (user.mail == null || user.displayName == null){
+                    continue;
+                }
+                JSONObject oneUserInfo = new JSONObject();
+
+                oneUserInfo.put("user_uuid", user.id);
+                oneUserInfo.put("display_name", user.displayName);
+                oneUserInfo.put("mail", user.mail);
+                userList.add(oneUserInfo);
+            }
+        }
+
+        return JSON.toJSONString(userList);
+    }
 
     public String syncUserInfo(String deltaLink, String skipToken){
         String syncUserInfoJson = "";
@@ -81,7 +111,6 @@ public class UserRequests extends GraphBaseRequest {
 
         return syncUserInfoJson;
     }
-
 
     public String syncGroupInfo(String deltaLink, String skipToken){
         String syncGroupInfoJson = "";

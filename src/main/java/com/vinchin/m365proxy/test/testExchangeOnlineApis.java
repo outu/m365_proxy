@@ -1,6 +1,8 @@
 package com.vinchin.m365proxy.test;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.vinchin.m365proxy.apis.ews.FolderRequests;
 import com.vinchin.m365proxy.apis.graph.common.ApplicationRequests;
@@ -20,9 +22,17 @@ public class testExchangeOnlineApis {
     private static GraphServiceClient<Request> graphClient;
 
     public static void main(String[] args) throws Exception {
-        String mailbox = "yunqi@s22fb.onmicrosoft.com";
-        initClient(mailbox);
-        System.out.println(getAzureADInfo());
+        String aa = "[{\"user_uuid\":\"6bc8c777-de62-43cc-b2ea-8e67b0ddaf41\",\"mail\":\"AdeleV@s22fb.onmicrosoft.com\",\"display_name\":\"Adele Vance\"}, {\"user_uuid\":\"766400b9-e074-41d4-81d1-684275421205\",\"mail\":\"admin@s22fb.onmicrosoft.com\",\"display_name\":\"admin 1\"}, {\"user_uuid\":\"486b036f-7e8d-4c02-a5c6-0a14228cb3c6\",\"mail\":\"AlexW@s22fb.onmicrosoft.com\",\"display_name\":\"Alex Wilber\"}, {\"user_uuid\":\"e3c75dc7-d907-4f43-b7f9-3eecdd376ab9\",\"mail\":\"DiegoS@s22fb.onmicrosoft.com\",\"display_name\":\"Diego Siciliani\"}, {\"user_uuid\":\"f936cc77-d21b-452b-8a30-6f070c8cd536\",\"mail\":\"graph11@s22fb.onmicrosoft.com\",\"display_name\":\"graph11 yang\"}, {\"user_uuid\":\"3a6ca773-689b-4dd2-bff7-6b7cbf406a87\",\"mail\":\"HenriettaM@s22fb.onmicrosoft.com\",\"display_name\":\"Henrietta Mueller\"}, {\"user_uuid\":\"7cca98a9-c4a6-4b53-99c1-296360dc9790\",\"mail\":\"IsaiahL@s22fb.onmicrosoft.com\",\"display_name\":\"Isaiah Langer\"}, {\"user_uuid\":\"31f1e733-fac3-4bd6-8404-403e5270aa07\",\"mail\":\"JohannaL@s22fb.onmicrosoft.com\",\"display_name\":\"Johanna Lorenz\"}, {\"user_uuid\":\"31557409-1586-40e8-aa6d-eb97c4a335cc\",\"mail\":\"JoniS@s22fb.onmicrosoft.com\",\"display_name\":\"Joni Sherman\"}, {\"user_uuid\":\"106d8a8b-de8b-46b7-b9fe-aa6b37adc878\",\"mail\":\"LeeG@s22fb.onmicrosoft.com\",\"display_name\":\"Lee Gu\"}, {\"user_uuid\":\"4894a6be-ac8a-481e-9a5f-2b3fe837caeb\",\"mail\":\"LidiaH@s22fb.onmicrosoft.com\",\"display_name\":\"Lidia Holloway\"}, {\"user_uuid\":\"3721b71e-e922-4030-8aa1-ec59709f5f05\",\"mail\":\"LynneR@s22fb.onmicrosoft.com\",\"display_name\":\"Lynne Robbins\"}, {\"user_uuid\":\"36902b92-2f3c-4c02-a719-a8efebc154f0\",\"mail\":\"MeganB@s22fb.onmicrosoft.com\",\"display_name\":\"Megan Bowen\"}, {\"user_uuid\":\"d1e2dde6-15d1-4997-8b10-cbb9ac5188cb\",\"mail\":\"MiriamG@s22fb.onmicrosoft.com\",\"display_name\":\"Miriam Graham\"}, {\"user_uuid\":\"dd14e57b-1edc-426f-ab7c-02f0a4834f11\",\"mail\":\"NestorW@s22fb.onmicrosoft.com\",\"display_name\":\"Nestor Wilke\"}, {\"user_uuid\":\"4c6a9580-43eb-488b-9eae-abc530d9fa28\",\"mail\":\"PattiF@s22fb.onmicrosoft.com\",\"display_name\":\"Patti Fernandez\"}, {\"user_uuid\":\"4da9283d-b91a-4b47-97ca-e0904725537a\",\"mail\":\"PradeepG@s22fb.onmicrosoft.com\",\"display_name\":\"Pradeep Gupta\"}, {\"user_uuid\":\"0b81c110-9f38-4ccf-8e6b-4f6f65ad56c1\",\"mail\":\"rrrr@s22fb.onmicrosoft.com\",\"display_name\":\"rrrr\"}, {\"user_uuid\":\"9c8fbd04-43c5-4646-be71-583b305d6eb9\",\"mail\":\"YUNqi@s22fb.onmicrosoft.com\",\"display_name\":\"eee eee\"}]";
+
+        List<JSONObject> userList = JSON.parseObject(aa, new TypeReference<ArrayList<JSONObject>>(){});
+        int a = 10;
+
+        //JSONObject bbb = JSON.parseObject(aa);
+
+//        userInfoJsonObject.get(0);
+//        String mailbox = "yunqi@s22fb.onmicrosoft.com";
+//        initClient(mailbox);
+//        System.out.println(getAzureADInfo());
 //        ContactRequests contactRequests = new ContactRequests(ewsClient);
 //        contactRequests.getContactGroup();
         //System.out.printf("%s", syncGetMessageInfo("AQMkAGI1ZmRjZWUAZC0yZTVlLTQyMzctYTc4Ni0yYjE3NDMxMjdhOGYALgAAAy5x2W1SrcBDvroL1Asx4J8BAKuvciembiNLk9i11WPD-4EAAAIBDAAAAA==","yunqi@s22fb.onmicrosoft.com","",""));

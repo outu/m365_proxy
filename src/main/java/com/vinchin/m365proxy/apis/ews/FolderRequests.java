@@ -21,12 +21,17 @@ public class FolderRequests extends EwsBaseRequest {
         ewsClient = ewsClientCache;
     }
 
-    public JSONObject getFolderInfo(WellKnownFolderName folderName) throws Exception {
-        Folder folder = Folder.bind(ewsClient, folderName);
+    public JSONObject getFolderInfo(WellKnownFolderName folderName){
         JSONObject folderInfo = new JSONObject();
-        folderInfo.put("folder_id", folder.getId().getUniqueId());
-        folderInfo.put("parent_folder_id", folder.getParentFolderId().getUniqueId());
-        folderInfo.put("display_name", folder.getDisplayName());
+        try{
+            Folder folder = Folder.bind(ewsClient, folderName);
+
+            folderInfo.put("folder_id", folder.getId().getUniqueId());
+            folderInfo.put("parent_folder_id", folder.getParentFolderId().getUniqueId());
+            folderInfo.put("display_name", folder.getDisplayName());
+        } catch (Exception e){
+            return folderInfo;
+        }
 
         return folderInfo;
     }

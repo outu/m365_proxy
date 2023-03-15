@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
-import static com.vinchin.m365proxy.m365proxy.M365ProxyError.BdErrorCode.BD_GENERIC_ERROR;
 import static com.vinchin.m365proxy.m365proxy.M365ProxyError.BdErrorCode.BD_GENERIC_SUCCESS;
 import static com.vinchin.m365proxy.m365proxy.M365ProxyError.M365ErrorCode.M365_DETECT_ENV_GENERIC_ERROR;
 import static com.vinchin.m365proxy.m365proxy.M365ProxyError.M365ErrorCode.M365_RPC_MSG_ERROR;
@@ -46,7 +45,7 @@ public class M365CommonRpcServerHandler extends M365ProxyRpcServer {
         M365CommonRpcMessageDefine.M365CommonRpcOpcode m365CommonRpcOpcode= M365CommonRpcMessageDefine.M365CommonRpcOpcode.getOpCodeEnum(m365CommonRpcCode);
         switch (m365CommonRpcOpcode){
             case M365_COMMON_RPC_OPCODE_DETECT_ENV:
-                //ret = handleDetectM365Env(byteBuffer, length);
+                ret = handleDetectM365Env(m365CommonRpcCode,byteBuffer, length);
                 break;
             case M365_COMMON_RPC_OPCODE_GET_USER_LIST:
                // ret = handleRpcExchPacket(m365CommonRpcCode, byteBuffer, length);
